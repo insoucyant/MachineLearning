@@ -1,0 +1,64 @@
+\documentclass{article}
+\usepackage{tikz}
+\usetikzlibrary{shapes, arrows, positioning, fit, backgrounds}
+% \begin{document}
+
+% Define block styles
+\tikzstyle{decision} = [diamond, draw, fill=yellow!40, 
+    text width=4.5em, text badly centered, node distance=1.75cm, inner sep=0pt]
+\tikzstyle{decisiong} = [diamond, draw, fill=blue!40, 
+    text width=4.5em, text badly centered, node distance=1.75cm, inner sep=0pt]
+\tikzstyle{block} = [rectangle, node distance=1.75cm, minimum width=1cm, minimum height=0.5cm, draw, fill=yellow!20, 
+    text width=20em, text centered, rounded corners, minimum height=1.5em]
+\tikzstyle{blockg} = [rectangle, minimum width=0.5cm, minimum height=0.5cm, draw, fill=blue!50, 
+    text width=15em, text centered, rounded corners, minimum height=1.5em]
+\tikzstyle{blockh} = [rectangle, minimum width=0.5cm, minimum height=0.5cm, draw, fill=green!50, 
+    text width=15em, text centered, rounded corners, minimum height=1.5em]
+\tikzstyle{blockwhite} = [rectangle, minimum width=0.5cm, minimum height=0.5cm, draw, fill=white!50, 
+    text width=15em, text centered, rounded corners, minimum height=1.5em]
+\tikzstyle{line} = [draw, -latex']
+\tikzstyle{cloud} = [draw, ellipse,fill=yellow!20, node distance=1.5cm, 
+    minimum height=1em]
+\tikzstyle{invis} = [draw, fill=yellow!10, node distance=4.25cm, 
+    minimum height=2em]
+\tikzstyle{invisg} = [draw, fill=yellow!10, node distance=3.5cm, 
+    minimum height=2em]
+\tikzstyle{matheq} = [node distance=8.75cm, text width=21em, minimum width=1cm, 
+    minimum height=2em, text centered]
+
+
+\begin{tikzpicture}[node distance = 1.25cm, auto]
+    % Place nodes
+    \node [cloud] (exit) {};
+
+    \node [blockh, below of=exit] (ln1) {Layer Norm};
+    \node [blockg, below of=ln1] (ff) {\textbf{Feed-forward}};
+    \node [cloud, below of=ff] (mid) {};
+    \node [blockh, below of=mid] (ln2) {Layer Norm};
+    
+    \node [blockg, below of=ln2] (sa) {\textbf{Self-Attention} };
+    \node [cloud, below of=sa] (init) {};
+    \node [blockwhite, below of=init] (input) {Encoder };
+
+ 
+
+    \begin{scope}[on background layer]
+    \node[draw, fill=blue!20, fit=(sa) (ln1), inner xsep=5mm]{};
+    \end{scope}
+    % Draw edges
+    \path [line] (ln1) -- (exit);
+    \path [line] (ff) -- (ln1);
+    \path [line] (mid) -- (ff);
+    \path [line] (ln2) -- (mid);
+    \path [line] (sa) -- (ln2);
+    \path [line] (init) -- (sa);
+
+    \path [line] (init) -| ([xshift=3cm, yshift=0cm]init.east) |- (ln2);
+    \path [line] (mid) -| ([xshift=3cm, yshift=0cm]mid.east) |- (ln1);
+
+
+% https://tex.stackexchange.com/questions/142548/tikz-complicated-flow-chart
+
+\end{tikzpicture}
+
+% \end{document}

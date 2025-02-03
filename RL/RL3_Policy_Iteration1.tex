@@ -1,0 +1,13 @@
+\documentclass{standalone}
+\usepackage{tikz}
+\usetikzlibrary{quotes,angles}
+\begin{document}
+\begin{tikzpicture}
+  \draw
+    (-7,-2) coordinate (a) node[below right] {a}
+    -- (0,0) coordinate (b) node[right] {$V^*,  \pi^*$}
+    -- (-7,2) coordinate (c) node[above right] {c}
+    % pic["$\alpha$", draw=orange, <->, angle eccentricity=1.2, angle radius=1cm]
+    % {angle=a--b--c};
+\end{tikzpicture}
+\end{document}

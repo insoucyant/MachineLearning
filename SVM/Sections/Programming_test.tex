@@ -1,0 +1,249 @@
+\documentclass[12pt]{exam}
+\usepackage[utf8]{inputenc}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{multicol}
+\usepackage{listings} % To include R code
+
+\newcommand{\class}{Programming-Python \& R}
+\newcommand{\term}{Winter 2017}
+\newcommand{\examnum}{Exam 1}
+\newcommand{\examdate}{09-Nov-2017}
+\newcommand{\timelimit}{30 Minutes}
+
+\pagestyle{head}
+\firstpageheader{}{}{}
+\runningheader{\class}{\examnum\ - Page \thepage\ of \numpages}{\examdate}
+\runningheadrule
+
+
+\begin{document}
+
+\noindent
+\begin{tabular*}{\textwidth}{l @{\extracolsep{\fill}} r @{\extracolsep{6pt}} l}
+\textbf{\class} & \textbf{Name:} & \makebox[2in]{\hrulefill}\\
+\textbf{\term} &&\\
+\textbf{\examnum} &&\\
+\textbf{\examdate} &&\\
+\textbf{Time Limit: \timelimit} & Teaching Assistant & \makebox[2in]{\hrulefill}
+\end{tabular*}\\
+\rule[2ex]{\textwidth}{2pt}
+
+This exam contains \numpages\ pages (including this cover page) and \numquestions\ questions.\\
+Total of points is \numpoints.
+\textbf{This test is open book, open notes, closed internet.} \\
+Each question is about R and Python unless otherwise mentioned. Kindly write the codes in both the languages. This is an open book/notes, closed laptop test.The last question is open laptop, closed internet test. Kindly hand over the answer sheet before opening your laptop. The question paper will be in your mail box [for the last question] just for which mail [net] can be used. \\
+Abbreviations used are:\\
+WARP : Write a R program\\
+WAPP : Write a Python Program \\
+WAR\&APP :  Write a R \& a Python program. 
+
+
+\begin{center}
+Grade Table (for teacher use only)\\
+\addpoints
+\gradetable[v][questions]
+\end{center}
+
+\noindent
+\rule[2ex]{\textwidth}{2pt}
+
+\begin{questions}
+
+\question[2] What's the difference between tuple and dictionary in Python? Which one is mutable?
+\makeemptybox{1in}
+\addpoints
+
+\question[2] In R, the \texttt{rpart} package, and the \texttt{rpart} function provide recursive partitioning solutions for both classification and regression. What determines whether \texttt{rpart} function will perform a classification analysis or a regression analysis?
+\makeemptybox{1in}
+\addpoints
+
+\question[2] Name a clustering method that requires you to specify the number of
+clusters in its solution. Name a clustering method that does not require you to
+specify the number of clusters.
+\makeemptybox{1in}
+\addpoints
+
+\question[2] Write a R program to standardize the columns of X by subtracting the median and dividing by the mean average deviation.
+\makeemptybox{1in}
+\addpoints
+
+\question[2] Name 2 distance measures that can be used in \texttt{dist()} 
+\makeemptybox{1in}
+\addpoints
+
+\question[10] Consider the following vector of values stored in a variable called $x$: \\
+\begin{lstlisting}[language=R]
+> x
+> 3 99 56 4 8 1 NA 8 1 0 43 NA 8 2 3 
+\end{lstlisting}
+\noaddpoints % to omit double points count
+\begin{parts}
+\part[2] WAR\&APP to return the positions of the missing values in $x$
+\makeemptybox{1in}
+\part[2] WAR\&APP to compute the nuymber of non missing values in $x$
+\makeemptybox{1in}
+\part[2] WAR\&APP to replace the missing values in $x$ with the mean of the non-missing values in $x$
+\makeemptybox{1in}
+\part[2] Write a R \textit{function} that, when passed a vector, will return a vector with the missing values in the vector replaced by the mean of the non-missing values of the vector
+\makeemptybox{2in}
+\part[2] WARP to extract lines from a vector names \texttt{thestring}
+which have more than one double quoted strings. For example, these lines\\
+\texttt{this "line" has "quoted" "strings"} \\
+\texttt{"one" more to follow "two" } \\
+\texttt{"a""b"} \\
+should be extracted, but these: \\
+\texttt{there’s "one" quoted string }\\
+\texttt{Here’s a quote " }\\
+\texttt{No quotes here }\\
+should not. 
+\makeemptybox{2in}
+\part[2] WARP that will remove multiple blanks from before and
+after a vector of strings called \texttt{fullstrings}. For example, \texttt{" hello, Python ”} should be converted to ``\texttt{hello, Python}", and ``\texttt{Telco R} ” should be converted to
+``\texttt{Telco R}”.
+\makeemptybox{1in}
+\end{parts}
+\addpoints
+
+
+
+\question[10]  Consider a vector called $book$, each element of which contains the text of one sentence of a book. For the purposes of this question, consider a word as text separated from other text by one or more blanks. \\
+\noaddpoints % to omit double points count
+\begin{parts}
+\part[2] WAR\&APP to find the average number of characters in each sentence including the blanks, and another program to find the average number of characters in each sentence not including the blanks.
+\makeemptybox{1.5in}
+\part[2] WAR\&APP to  to find the average number of words in each line of the book. 
+\makeemptybox{1in}
+\part[2] WAR\&APP m to find the line in the book with the most characters.
+\makeemptybox{1in}
+\end{parts}
+\addpoints
+
+\question[16]  For each of the short R program below, state the approximate value that $z$ will hold after executing the code.
+\noaddpoints % to omit double points count
+\begin{parts}
+\part[2] R code:\\
+\begin{lstlisting}[language=R]
+x = seq (1 , 11 , 2)
+dim ( x ) = c (3 , 2)
+z = x [ , dim ( x ) [2]]
+\end{lstlisting}
+\makeemptybox{0.25in}
+\part[2] R Code: \\
+\begin{lstlisting}[language=R]
+x = seq (100) %% 2
+y = c (1 , 2)
+z = sum (x * y )
+\end{lstlisting}
+\makeemptybox{0.25in}
+\part[2] R Code: \\
+\begin{lstlisting}[language=R]
+x = array ( c (1 , 2 , 2 , 1) , c (2 , 2) )
+z = apply (x , 1, sum ) - apply (x , 2 , sum )
+\end{lstlisting}
+\makeemptybox{1in}
+\part[2] R Code: \\
+\begin{lstlisting}[language=R]
+x = seq (6)
+z = (2* x < 10)
+\end{lstlisting}
+\makeemptybox{1in}
+\part[2] R Code: \\
+\begin{lstlisting}[language=R]
+z = which (1/ seq (10) < 0.5)
+\end{lstlisting}
+\makeemptybox{1in}
+\part[2] R Code: \\
+\begin{lstlisting}[language=R]
+x = 1
+f = function ( x ) c (2* x , x )
+z = f ( f (x ) )
+\end{lstlisting}
+\makeemptybox{1in}
+\part[2] R Code: \\
+\begin{lstlisting}[language=R]
+n = 10000
+x = runif (n , -1 , 1)
+y = runif (n , -1 , 1)
+z = mean ( x * x + y * y <= 1)
+\end{lstlisting}
+\makeemptybox{0.5in}
+\part[2] 
+\begin{lstlisting}[language=R]
+n = 10000
+x = runif ( n )
+z = mean ( x [ x > 0.5])
+\end{lstlisting}
+\makeemptybox{1in}
+\end{parts}
+\addpoints
+
+
+\question[3] Mark box if true.
+\addpoints
+\begin{checkboxes}
+\choice Function is an object in both R \& Python.
+\choice In Python, $(4.0 + 5) * 6$ will give 54
+\end{checkboxes}
+
+
+\question[15]  A classic puzzle called the Towers of Hanoi is a game that consists
+of three rods, and a number of disks of different sizes which can slide onto any rod.
+The puzzle starts with the disks in a neat stack in ascending order of size on one rod, the smallest at the top, thus making a conical shape.\\
+The objective of the puzzle is to move the entire stack to another rod,  obeying the
+following rules: \\
+\begin{itemize}
+\item Only one disk may be moved at a time.
+\item Each move consists of taking the upper disk from one of the rods and sliding it
+onto another rod, on top of the other disks that may already be present on that
+rod. 
+\item No disk may be placed on top of a smaller disk.
+\end{itemize}
+WAPP to do the above for any $n$ discs.
+\makeemptybox{2in}
+\addpoints
+
+\question[5] Using the list \texttt{L} \\
+
+\begin{lstlisting}[language=Python]
+L = ['Ford', 'Chevrolet', 'Toyota', 'Nissan', 'Tesla'] 
+\end{lstlisting}
+\noaddpoints % to omit double points count
+\begin{parts}
+\part[1] len(L)       % Ans 5
+\part[1] len(L[1])    % Ans 9
+\part[1] L[2]         % Ans Toyota
+\part[1] L[4] + '***' % Ans Tesla***
+\part[1] L[1] == L[2] % Ans False
+\makeemptybox{1in}    
+\end{parts}
+\addpoints
+
+
+\question[11] \textit{The waiting time of the $n^{th}$ customer in a single server queue}. Suppose customers labelled $C_0, C_1, \dots C_n$ arrive at times $\tau = 0, \tau_1, \dots , \tau_n $ for service by a single server. The interarrival times $A_1 = \tau_1 - \tau_0, \dots, A_n = \tau_n - \tau_{n-1}$ are independently and identically distributed (iid) random variables (rv) with the exponential density
+\begin{equation}
+    \lambda_\alpha e^{-\lambda_\alpha x} \quad \forall x \geq 0
+\end{equation}
+The service times $S_0, S_1, \dots S_n$ are iid rv which are also independent of the interarrival times with the exponential density
+\begin{equation}
+    \lambda_s e^{-\lambda_s x} \quad \forall x \geq 0
+\end{equation}
+Let $W_j$ denote the waiting time of customer $C_j$. Hence customer $C_j$ leaves at time $\tau_j + W_j + S_j$. If this time is greater than $\tau_{j+1}$ then the next customer, $C_{j+1}$ must wait for the time $\tau_j + W_j + S_j - \tau{j+1}$. Hence we have the recurrent relation
+\begin{equation}
+    W_0 = 0
+    \end{equation}
+    \begin{equation}
+    W_{j+1} = max \{0, W_j + S_j -A_{j+1}\} \quad \forall j = 0,1, \dots,n-1
+\end{equation}
+\noaddpoints % to omit double points count
+\begin{parts}
+\part[5] Write a function (R \& Python) \texttt{queue(n, aRate, srate)} which simulates one outcome of $W_n$ where \texttt{aRate} denotes $\lambda_\alpha$ and \texttt{sRate} denotes $\lambda_s$. Try out your function on an example such as \texttt{queue(50,2,2)}
+\part[6] Now suppose we wish to simulate many outcomes of $W_n$ in order to estimate some features of the distribution of $W_n$. Write a function which uses a loop to repeatedly call the function in part(a)  to calculate $W_n$. Then write another function which uses \texttt{sapply} (or \texttt{replicate}) to call the function created in part(a). Compare the speed of the two functions using \texttt{system.time}
+\makeemptybox{5in}    
+\end{parts}
+\addpoints
+
+\end{questions}
+
+\end{document}

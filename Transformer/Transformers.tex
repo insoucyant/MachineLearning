@@ -1,0 +1,142 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{tikz}
+\usetikzlibrary{shapes, arrows, positioning, fit, backgrounds}
+\title{Transformers}
+\author{Sumit Singh}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+\subsection{What is a Transformer?}
+Transformer at its core contains a stack of Encoded layers and Decoded layers. Encoder Stack is a group of Encoder Layers. The Encoder stack and the Decoder stack have their corresponding Embedding layers for their respective inputs. Finally, there is an Output layer to generate the final output. \\
+\input{encoder_decoder_stack.tex} \\
+An embedding layer is a type of hidden layer in a neural network. The layer maps input information from a high-dimensional to lower-dimensional space, allowing the network to learn more about the relationship between inputs and to process the data more efficiently. The Embedding layer provides a mapping function from input sequence to a higher-dimensional space often used for representing words or categorical variables. Key features include reducing data complexity, preserving relationship within data, and enhancing machine learning models' performance. \\
+All the encoders are identical to one another. Similarly, all the Decoders are identical. \\
+\input{Encoder1.tex} 
+%
+\input{decoder1.tex}\\
+\begin{itemize}
+    \item The Encoder contains the all-important Self-attention layer that computes the relationship between different words in the sequence, as well as a Feed-forward layer.
+    \item The Decoder contains the Self-attention layer and the Feed-forward layer, as well as a second Encoder-Decoder attention layer.
+    \item Each Encoder and Decoder has its own set of weights.
+\end{itemize}
+The Encoder is a reusable module that is the defining component of all Transformer architectures. In addition to the above two layers, it also has Residual skip connections around both layers along with two Layer Norm layers.
+\input{Encoder2}
+There are many variations of the Transformer architecture. Some Transformer architectures have no Decoder at all and rely only on the Encoder.
+\subsection{What does Attention do?}
+\subsection{Training the Transformer}
+The Transformer works slightly differently during Training and while doing Inference.
+Let's first look at the flow of data during Training. Training data consists of two parts:
+\begin{itemize}
+    \item The source or input sequence (eg. "You are welcome" in English, for a translation problem)
+    \item The destination or target sequence (eg. "De nada" in Spanish)
+\end{itemize}
+
+
+The Transformer's goal is to learn how to output the target sequence, by using both the input and target sequence. 
+The Transformer processes the data like this:
+\begin{enumerate}
+    \item The input sequence is converted into Embeddings (with Position Encoding) and fed to the encoder.
+    \item The stack of Encoders processes this and produces and encoded representation of the input sequence.
+    \item The target sequence is prepended with a start-of-sentence token, converted into Embeddings (with Positon Encoding), and fed to teh Decoder.
+    \item The stack of Decoders processes this along with the Encoder stack's encoded representation to produce an encoded representation of the target sequence.
+    \item The Output layer converts it into word probabilities and the final output sequence.
+    \item The transformer's loss function compares this output sequence with the target sequence from the training data. This loss is used to generate gradients to train the Transformer during back-propagation. 
+\end{enumerate}
+\subsection{Inference}
+During Inference, we have only the input sequence and don't have the target sequence to as input to the Decoder. The goal of the Transformer is to produce the target sequence from the input sequence alone. \\
+So, like in a Seq2Seq model, we generate output in a loop and feed the output sequence from the previous timestep to the Decoder in the next timestep until we come across an end-of-sentence token.  \\
+The difference from the Seq2Seq model is that, at each timestep, we re-feed the entire output sequence generated thus far, rather than just the last word. \\
+
+\begin{enumerate}
+    \item The input sequence is converted into Embeddings (with Postion Encoding) and fed to teh Encoder.
+    \item The stack of Encoders processes this and produces and encoded representation of the input sequence.
+    \item Instead of the target sequence, we use an empty sequence with only  a start-of-sentence token. This is converted into Embeddings (with Position Encoding) and fed to the Decoder. 
+    \item The stack of Decoders processes this along with the Encoder stack's encoded representation of the target sequence. 
+    \item We take the last word of the output sequence as the predicted word. That word is now filled into the second position of our Decoder input sequence, which now contains a start-of-sentence token and the first word. 
+    \item Go back to step#3. As before, feed teh new Decoder sequence into the model. Then take the second word of the output and append it to the Decoder sequence. Repeat this until it predicts an end-of-sentence token. Note that since the Encoder sequence does not change for each iteration, we do not have to repeat steps#1 and #2 each time. 
+\end{enumerate}
+\section{Architecture Overview - How it works?}
+\include{TransformerArchitecture1}
+The main components of the architecture are:
+\begin{itemize}
+    \item Data inputs for both the Encoder and Decoder, which contains:
+    \begin{itemize}
+        \item Embedding layer
+        \item Position Encoding layer
+    \end{itemize}
+    \item The Encoder stack contains a number of Encoders. Each Encoder contains:
+    \begin{itemize}
+        \item Multi-Head Attention layer
+        \item Feed-forward layer
+    \end{itemize}
+    \item The Decoder stack contains a number of Decoders. Each Decoder contains:
+    \begin{itemize}
+        \item Tho Multi-Head Attention layers
+        \item Feed-forward layer
+    \end{itemize}
+    \item Output - generates the final output, and contains:
+    \begin{itemize}
+        \item Linear layer
+        \item Softmax layer
+    \end{itemize}
+\end{itemize}
+\subsection{Embedding and Position Encoding}
+The Transformer needs two things about each word - the meaning of the word and its position in the sequence.
+\begin{itemize}
+    \item The Embedding layer encodes the meaning of the word.
+    \item The Position Encoding layer represents the position of the word.
+\end{itemize}
+The Transformer combines these two encodings by adding them.
+\subsubsection{Embedding}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Model}
+The design choice of using queries for the skip connection in the residual cross-attention block of a transformer decoder, rather than the values, is rooted in the fundamental working principles of transformers and the role of each component (queries, keys and values) in the attention mechanism.
+
+
+\subsubsection{Understanding the roles of Queries, Keys and Values:}
+\begin{itemize}
+    \item Queries: Represent the current state of the decoder. In the context of sequence-to-sequence models, this could be a partially decoded sequence at a given step.
+    \item Keys and Values: Derived from the encoder, they represent the information of the input sequence. Keys are used to compute attention weights, and values are used to construct the output based on these weights.
+\end{itemize}
+\subsection{Optimization}
+\begin{equation}
+    y_i(q,t,\tau) = f(q,\tau,\chi_{i,t-k:t,})
+\end{equation}
+\end{document}

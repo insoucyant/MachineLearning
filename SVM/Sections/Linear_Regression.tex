@@ -1,0 +1,61 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage{graphicx,wrapfig}
+\usepackage{amsmath}
+\usepackage{mathtools} % To add the curly braces
+\usepackage{bm} %To get bold values in Equation
+\graphicspath{ {SVM/SVMimages/} }
+\usepackage{setspace}
+\doublespacing
+
+\title{Multivariate Linear Regression}
+\author{sumit singh}
+\date{October 2017}
+
+\begin{document}
+
+\maketitle
+\section{Prologue}
+Results from matrix differentiation that we are going to use:
+\begin{align}
+\frac{\partial   \bm{A} \theta}{\partial \theta} &= \bm{A}^T \\
+\frac{\partial \theta^T \bm{A} \theta}{\partial \theta} &= 2 \bm{A}^T \theta
+\end{align}
+\section{Introduction}
+\section{Formulation}
+\begin{equation}
+J(\bm{\theta}) = (\bm{y} - \bm{X \theta})^T (\bm{y} - \bm{X \theta})
+\end{equation}
+with the matrix dimensions:
+\begin{equation}
+J(\bm{\theta}){1 \times 1} = (\bm{y}_{n \times 1} - \bm{X_{n \times d} \theta_{d \times 1}})_{1 \times n}^T (\bm{y} - \bm{X \theta})_{n \times 1}
+\end{equation}
+$J(\bm{\theta})$ is ${1 \times 1}$ matrix, or it is a scalar. It is mainly the sum of squares term, of the distance of each point from the regression line, which has to be minimized to get the optimal regression line. \\
+\begin{equation}
+J(\bm{\theta}) = \sum_{i=1}^n (Y_i - X_i^T \theta)^2
+\end{equation}
+For the First Order Condition we can take the derivatives of above summation, term by term, but instead we work on the matrices which makes it both mathematically convenient to manipulate them as well it is easier to code it:
+\begin{align}
+\frac{\partial J(\bm{\theta}) }{\partial \bm{\theta}}  &= \frac{\partial}{\partial \theta} (\bm{y} - \bm{X \theta})^T (\bm{y} - \bm{X \theta}) \\
+&= \frac{\partial}{\partial \theta} \bigl(
+\bm{y}^T \bm{y} -
+\underbrace{
+ \bm{y}^T \bm{X \theta} 
+- \bm{ \theta}^T \bm{X}^T \bm{y} 
+}
++ \bm{ \theta}^T \bm{X}^T \bm{X \theta} 
+\bigr) \\
+&= \frac{\partial}{\partial \theta} \bigl(
+\bm{y}^T \bm{y} - 2
+ \bm{y}^T \bm{X \theta} 
++ \bm{ \theta}^T \bm{X}^T \bm{X \theta} 
+\bigr) \\
+&= 0
+- 2 (\bm{y}^T \bm{X})^T \bm{\theta}
++ 2 (\bm{ \theta}^T \bm{X}^T \bm{X \theta} )^T \bm{\theta} 
+\end{align}
+Each of $\bm{y}^T \bm{X \theta}$ and $\bm{ \theta}^T \bm{X}^T \bm{y}$  are $1 \times 1$ matrix, they are scalar and will have same value hence they can be combined. In fact each of the terms in the above multiplication is a scalar\\ 
+
+
+
+
+\end{document}

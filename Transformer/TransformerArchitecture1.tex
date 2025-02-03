@@ -1,0 +1,104 @@
+\documentclass{article}
+\usepackage{tikz}
+\usetikzlibrary{shapes, arrows, positioning, fit, backgrounds}
+% \begin{document}
+
+% Define block styles
+\tikzstyle{decision} = [diamond, draw, fill=yellow!40, 
+    text width=4.5em, text badly centered, node distance=1.75cm, inner sep=0pt]
+\tikzstyle{decisiong} = [diamond, draw, fill=blue!40, 
+    text width=4.5em, text badly centered, node distance=1.75cm, inner sep=0pt]
+\tikzstyle{block} = [rectangle, node distance=1.75cm, minimum width=1cm, minimum height=0.5cm, draw, fill=yellow!20, 
+    text width=20em, text centered, rounded corners, minimum height=1.5em]
+\tikzstyle{blockembenc} = [rectangle,  minimum width=0.2cm, minimum height=0.5cm, draw, fill=green!40, 
+    text width=6em, text centered, rounded corners, minimum height=1.5em]
+\tikzstyle{blockencoder} = [rectangle,  minimum width=0.5cm, minimum height=0.5cm, draw, fill=blue!40, 
+    text width=15em, text centered, rounded corners, minimum height=1.5em]
+\tikzstyle{blockdecoder} = [rectangle,  minimum width=0.1cm, minimum height=0.5cm, draw, fill=violet!40, 
+    text width=15em, text centered, rounded corners, minimum height=1.5em]
+\tikzstyle{line} = [draw, -latex']
+\tikzstyle{cloud} = [draw, ellipse,fill=yellow!20, node distance=1.5cm, 
+    minimum height=2em]
+\tikzstyle{invis} = [draw, fill=yellow!10, node distance=4.25cm, 
+    minimum height=2em]
+\tikzstyle{invisg} = [draw, fill=yellow!10, node distance=3.5cm, 
+    minimum height=2em]
+\tikzstyle{matheq} = [node distance=8.75cm, text width=21em, minimum width=1cm, 
+    minimum height=2em, text centered]
+
+
+\begin{tikzpicture}[node distance = 1.25cm, auto]
+    % Place nodes
+    % RIGHT HAND SIDE
+    \node [cloud] (init) {Output};
+    
+    \node [blockembenc, below of=init] (softmax) {Softmax};
+    \node [blockembenc, below of=softmax] (linear) {Linear};
+    \node [blockdecoder, below of=linear] (lnr1) {Layer Norm};
+    \node [blockdecoder, below of=lnr1] (ffr1) {Feed Forward};
+    \node [blockdecoder, below of=ffr1] (lnr2) {Layer Norm};
+    \node [blockdecoder, below of=lnr2] (encdec) {Encoder-Decoder \\ Attention};
+    \node [blockdecoder, below of=encdec] (lnr3) {Layer Norm};
+    \node [blockdecoder, below of=lnr3] (sar) {Self-Attention};
+    \node [cloud, below of=sar] (dm1) {};
+    \node [blockembenc, below left=of dm1, xshift=0.5cm] (embr) {Embedding};
+    \node [blockembenc, below right=of dm1, xshift=0.0cm] (encr) {Position \\ Encoding};
+    \node [blockembenc, below of=embr] (target) {Target};
+    % LEFT HAND SIDE
+    \node [blockencoder, left=0.9cm of lnr1] (enc1) {Encoder};
+    \node [blockencoder, left=0.9cm of lnr2] (lnrl1) {Layer Norm};
+    \node [blockencoder, below of=lnrl1] (ffl) {Feed Forward};
+    \node [blockencoder, below of=ffl] (lnrl2) {Layer Norm};
+    \node [blockencoder, below of=lnrl2] (sal) {Self-Attention};
+    \node [cloud, below of=sal] (dmleft) {};
+    \node [blockembenc, below left=of dmleft, xshift=0.5cm] (embl) {Embedding};
+    \node [blockembenc, below right=of dmleft, xshift=-0.5cm] (encl) {Position \\ Encoding};
+    \node [blockembenc, below of=embl] (input) {Input};
+
+    
+    
+    
+
+ 
+    \begin{scope}[on background layer]
+    \node[draw, fill=black!10, fit=(embl) (softmax), inner xsep=5.75mm]{};
+    \end{scope}
+    \begin{scope}[on background layer]
+    \node[draw, fill=violet!20, fit=(sar) (lnr1), inner xsep=3.75mm]{};
+    \end{scope}
+    \begin{scope}[on background layer]
+    \node[draw, fill=blue!20, fit=(sal) (lnrl1), inner xsep=3.75mm]{};
+    \end{scope}
+    
+    % Draw edges
+    % RIGHT HAND SIDE
+    \path [draw,->] (softmax) -- (init);
+    \path [line] (linear) -- (softmax);
+    \path [line] (lnr1) -- (linear);
+    \path [line] (ffr1) -- (lnr1);
+    \path [line] (lnr2) -- (ffr1);
+    \path [line] (encdec) -- (lnr2);
+    \path [line] (lnr3) -- (encdec);
+    \path [line] (sar) -- (lnr3);
+    \path [line] (dm1) -- (sar);
+    \path [line] (encr) -| ([xshift=0.0cm, yshift=0.5cm]encr.west) |- (dm1);
+    \path [line] (embr) -| ([xshift=0.0cm, yshift=0.0cm]embr.east) |- (dm1);
+    \path [line] (target) -- (embr);
+
+    \path [line] (enc1) -- (encdec);
+    
+
+     % LEFT HAND SIDE
+    \path [line] (lnrl1) -- (enc1);
+    \path [line] (ffl) -- (lnrl1);
+    \path [line] (lnrl2) -- (ffl);
+    \path [line] (sal) -- (lnrl2);
+    \path [line] (dmleft) -- (sal);
+    \path [line] (encl) -| ([xshift=0.0cm, yshift=0.5cm]encl.west) |- (dmleft);
+    \path [line] (embl) -| ([xshift=0.0cm, yshift=0.0cm]embl.east) |- (dmleft);
+    \path [line] (input) -- (embl);
+    
+
+
+\end{tikzpicture}
+% \end{document}

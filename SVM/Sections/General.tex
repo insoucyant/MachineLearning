@@ -1,0 +1,124 @@
+\documentclass[border=20pt,tikz]{standalone}
+\usepackage{forest}
+
+\forestset{
+  direction switch/.style={
+    for tree={
+      if level=3{}{draw},
+      thick,
+      edge={thick},
+      if level=1{
+        child anchor=north,
+        edge path={
+          \noexpand\path [\forestoption{edge}] (!u.parent anchor) -- ++(0,-.5em) -| (.child anchor)\forestoption{edge label};
+        },
+        s sep+=.5em,
+        for descendants={
+          child anchor=west,
+          align=left,
+          edge path={
+            \noexpand\path [\forestoption{edge}] (!u.parent anchor) ++(1em,0) |- (.child anchor)\forestoption{edge label};
+          },
+          fit=band,
+        },
+        for tree={
+          parent anchor=south west,
+          anchor=mid west,
+          grow'=0,
+          font=\sffamily,
+          if n children=0{}{
+            delay={
+              prepend={[,phantom, calign with current]}
+            }
+          },
+          before computing xy={
+            l=2em
+          },
+        },
+        before drawing tree={
+          x/.wrap pgfmath arg={##1}{.6*x()},
+          for children={
+            x/.wrap pgfmath arg={##1+1em}{.6*x()},
+            for children={
+              x/.wrap pgfmath arg={##1+2em}{.6*x()},
+            }
+          }
+        }
+      }{
+        if level=0{
+          parent anchor=south,
+          anchor=south,
+        }{},
+      },
+    },
+  }
+}
+\begin{document}
+
+\begin{forest}
+  % forest preamble: determine layout and format of tree
+  direction switch
+  [Life Prediction Approaches and Techniques
+    [Model-base
+      [Physics-of-Failure
+      ]
+      [Satistical Model
+        [Proportion Hazard Model]
+        [Logistics Regression Model]
+        [Cumulative Damage Model]
+      ]
+      [Kalman/Particle Filtering
+      ]
+      [Nonlinear Dynamics
+      ]
+    ]
+    [Knowledge-base
+      [Expert Systems
+        [Rule-Based]
+        [Model-Based]
+        [Case-Based]
+      ]
+      [Fuzzy Logics
+      ]
+    ]
+    [Experience-base
+      [Parametric Distribution
+        [Location Scale \& Log-Location Scale]
+        [Normal \& Lognormal]
+        [Smallest \& Largest Extreme Values]
+        [Something Beginning with W]
+        [Logistic \& Log-Logistic]
+      ]
+      [Nonparametric Distribution
+      ]
+    ]
+    [Data-driven
+      [Multivariate Statistical Method
+        [Principal Component Analysis]
+        [Something \& Something Else]
+        [Another Thing]
+        [A Final Thing Here]
+      ]
+      [Black-Box Methods
+        [Decision Trees]
+        [Multilayer Perceptions]
+        [Neural Networks]
+        [Radial Basis Functions]
+        [Vector Quantification]
+      ]
+      [Signal Analysis
+        [Auto-Something Here]
+        [Fourier Transform]
+        [Filters]
+        [Tidal Functions]
+      ]
+      [Graphical Model
+        [Bayesian Network]
+        [Hidden Markov Networks]
+      ]
+      [Self-Organising Feature Maps
+      ]
+    ]
+  ]
+\end{forest}
+\end{document}

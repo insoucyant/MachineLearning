@@ -1,0 +1,101 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,tikz,tcolorbox}
+
+\title{Linear Algebra Notes}
+\author{sumit singh}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{The Equations}
+
+\begin{equation}
+    \min_{\forall i} \sqrt{wt_1 (GoalDT - DT_i)^2 + wt_2 (Goal OT - OT_i)^2 +wt_3 (Goal CR - CR_i)^2}
+\end{equation}
+\subsection{Cross Product in the form of unit vector}
+\begin{equation}
+    \Vec{a} \times \Vec{b} = |a| |b| \sin\theta   \hat{n}
+\end{equation}
+\subsection{Cross Product in the form of a Matrix}
+\begin{equation}
+    \vec{a} = \begin{pmatrix}
+        a_1 \\ a_2 \\ a_3
+    \end{pmatrix}
+\end{equation}
+
+\begin{equation}
+    \vec{b} = \begin{pmatrix}
+        b_1 \\ b_2 \\ b_3
+    \end{pmatrix}
+\end{equation}
+
+
+
+\begin{equation}
+   \vec{a} \times \vec{b} = (a_2 b_3 -a_3 b_2)i  - (a_1b_3 - a_3 b_1)j + (a_1 b_2 - a_2 b_1)k
+\end{equation}
+
+\begin{equation}
+    \vec{a} \times \vec{b} = \begin{vmatrix}
+        i & j & k \\
+        a_1 & a_2 & a_3 \\
+        b_1 & b_2 & b_3 \\
+    \end{vmatrix} = (a_2b_3-a_3b_2)i - (a_1b_3 -a_3b_1)j + (a_1b_2-a_2 b_1)k
+\end{equation}
+
+
+\begin{itemize}
+    \item Scalar or Dot Product
+    \item Matrix or diadic product
+    \item Vector or cross product
+\end{itemize}
+$\boldsymbol{x} \& \boldsymbol{z}$  are column vectors. :
+\begin{equation}
+    \boldsymbol{x} = \begin{bmatrix}
+        x_0 & x_1 & x_2
+    \end{bmatrix}^{T}
+\end{equation}
+
+\begin{equation}
+    \boldsymbol{z} = \begin{bmatrix}
+        z_0 & z_1 & z_2 
+    \end{bmatrix}^T
+\end{equation}
+
+\begin{flalign}
+     &  &  \boldsymbol{x}^T \cdot \boldsymbol{z}= \boldsymbol{x} \bullet  \boldsymbol{z}  & = x_0 z_0. + x_1 z_1 + x_2 z_2 &  & \text{Scalar or Dot Product}\label{eq:a’} \\
+     &  &  \boldsymbol{x}^T \cdot \boldsymbol{z}= \boldsymbol{x} \circ  \boldsymbol{z}  & = =\begin{bmatrix}
+        x_0z_0 & x_0z_1 & x_0z_2 \\
+        x_1z_0 & x_1z_1 & x_1z_2 \\
+        x_2z_0 & x_2z_1 & x_2z_2 \\ 
+    \end{bmatrix} &  & \text{Matrix or Diadic Product}\label{eq:c’} \\
+     &  & \boldsymbol{x} \times \boldsymbol{z}  & = \begin{bmatrix}
+        x_1z_2 - x_2z1  \\
+        -x_0z_2 + x_2z_0 \\
+        x_0z_1 - x_1z_0  \\ 
+    \end{bmatrix}  &  &  \text{Vector or Cross Product}\label{eq:b’}
+    \end{flalign}
+
+\begin{tcolorbox}[title=Vector or Cross Product,colback=red!30!yellow,colframe=blue!80!white]
+    
+    \begin{equation}
+        \boldsymbol{x} \times \boldsymbol{z}  = \begin{bmatrix}
+        x_1z_2 - x_2z1  \\
+        -x_0z_2 + x_2z_0 \\
+        x_0z_1 - x_1z_0  \\ 
+    \end{bmatrix}
+    \end{equation}
+\end{tcolorbox}
+\section{Introduction}
+Partition the input space into recursively generated rectangles. Recursively splitting of region. \\
+Biggest advantage of DT is interpretability. (At the other extreme is neural networks which is incomprehensible) . This helps in very compactly describing  the segmentation as a tree. An easily understandable tree. \\
+Neural networks are universal approximators. So are DTs. The parameters can grow unbounded. \\
+In DT, you can repeat the variables. \\
+DTs are \textbf{non parametric}. It can keep growing. You can keep adding the parameters as you go along. \\
+\section{Regression Trees}
+So far, we did partitioning. Now regression trees.\\
+\section{References}
+\end{document}

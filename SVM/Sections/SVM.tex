@@ -1,0 +1,274 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage{tikz}
+\usepackage{tikz-qtree,tikz-qtree-compat}
+\usetikzlibrary{calc}
+\usepackage{pgfplots,amsmath}
+\pgfplotsset{compat=1.12}
+\usepackage{amssymb,mathtools}
+\usepackage{setspace}
+\doublespacing
+
+\title{Support Vector Machine}
+\author{sumit singh}
+\date{October 2017}
+
+\begin{document}
+
+\maketitle
+
+\section{Mathematics of SVM}
+Source: MIT 6.034 AI Prof Patrick Winston
+%****************************************************
+%****************************************************
+%****************************************************
+\begin{figure}[h]  
+%\begin{centre}
+\tikzset{
+    leftNode/.style={circle,minimum width=.5ex, fill=none,draw},
+    rightNode/.style={circle,minimum width=.5ex, fill=black,thick,draw},
+    rightNodeInLine/.style={solid,circle,minimum width=.7ex, fill=black,thick,draw=white},
+    leftNodeInLine/.style={solid,circle,minimum width=.7ex, fill=none,thick,draw},
+  }
+  \begin{tikzpicture}[
+        scale=2,
+        important line/.style={thick}, dashed line/.style={dashed, thin},
+        every node/.style={color=black},
+    ]
+    \draw[dashed line, yshift=.7cm]
+       (.2,.2) coordinate (sls) -- (2.5,2.5) coordinate (sle)
+       node[solid,circle,minimum width=2.8ex,fill=none,thick,draw] (name) at (2,2){}
+       node[leftNodeInLine] (name) at (2,2){}
+       node[solid,circle,minimum width=2.8ex,fill=none,thick,draw] (name) at (1.5,1.5){}
+       node[leftNodeInLine] (name) at (1.5,1.5){}
+       node [above right] {$w\cdot x + b > 1$};
+
+    \draw[important line]
+       (.7,.7) coordinate (lines) -- (3,3) coordinate (linee)
+       node [above right] {$w\cdot x + b = 0$};
+
+    \draw[dashed line, xshift=.7cm]
+       (.2,.2) coordinate (ils) -- (2.5,2.5) coordinate (ile)
+       node[solid,circle,minimum width=2.8ex,fill=none,thick,draw] (name) at (1.8,1.8){}
+       node[rightNodeInLine] (name) at (1.8,1.8){}
+       node [above right] {$w\cdot x + b < -1$};
+
+    \draw[very thick,<->] ($(sls)+(.2,.2)$) -- ($(ils)+(.2,.2)$)
+       node[sloped,above, near end] {Margen};
+
+    \foreach \Point in {(.9,2.4), (1.3,2.5), (1.3,2.1), (2,3), (1,2.9)}{
+      \draw \Point node[leftNode]{};
+    }
+
+    \foreach \Point in {(2.9,1.4), (2.3,.5), (3.3,.1), (2,0.9), (2.5,1)}{
+      \draw \Point node[rightNode]{};
+    }
+  \end{tikzpicture}
+\caption{SVM}  
+%\end{centre}  
+\end{figure}  
+%****************************************************
+%****************************************************
+%****************************************************
+
+$\vec{w}$ is a normal to the median of the street.\\
+$\vec{u}$ is the unknown vector for deciding classification of an unknown data point. \\
+$\vec{w} \cdot \vec{u} \geq c$ \\
+$\vec{w} \cdot \vec{u} + b \geq 0 \implies `+' Decision Rule$
+%****************************************************
+%****************************************************
+%****************************************************
+\begin{figure}[h]
+\begin{centre}
+\begin{tikzpicture}
+
+\begin{axis}[domain=0:5, samples=50,grid=major, 
+legend style={legend cell align=left, font=\tiny},
+restrict y to domain=0:5,xlabel=$\text{X -Axis}$,
+ylabel=$\text{Y-Axis}$, legend pos=north east]
+
+\node[state] (00); % {Origin};
+\coordinate (A) at (0.5,9/4); %\draw (0.5,9/4) node {A};
+%\coordinate (B) at (1,1.5); \draw (1,1.5) node {B};
+\coordinate (C) at (2,2); %\draw (2,2) node {C};
+\coordinate (O) at (0,0); % Origin
+
+
+\draw [dashed,thick,arrows=->,color=blue] (O) -- (A);
+\draw [dashed,thick,arrows=->,color=orange] (A) -- (C);
+\draw [dashed,thick,arrows=->,color=black] (O) -- (C);
+
+ \node[solid,circle,minimum width=2.8ex,fill=none,thick,draw, color=red] (name) at (0.5,9/4){};
+  \node[solid,circle,minimum width=2.0ex,fill=none,thick,draw, color=red] (name) at (0.5,9/4){};
+\node[solid,circle,minimum width=2.8ex,fill=none,thick,draw, color=red] (name) at (1.5,3/4){};
+\node[solid,circle,minimum width=2.0ex,fill=none,thick,draw, color=red] (name) at (1.5,3/4){};  
+\node[solid,circle,minimum width=2.0ex,fill=none,thick,draw, color=red] (name) at (0.5,3/4){};  
+\node[solid,circle,minimum width=2.0ex,fill=none,thick,draw, color=red] (name) at (0.2,1.8){};
+\node[solid,circle,minimum width=2.0ex,fill=none,thick,draw, color=red] (name) at (1,0.2){};
+  
+  
+\node[solid,circle,minimum width=2.8ex,fill=none,thick,draw, color=blue] (name) at (4,1){};
+\node[solid,circle,minimum width=2.0ex,fill=blue,thick,draw, color=blue] (name) at (4,1){};
+\node[solid,circle,minimum width=2.8ex,fill=none,thick,draw,
+color=blue] (name) at (2.5,13/4){};
+\node[solid,circle,minimum width=2.0ex,fill=blue,thick,draw, color=blue] (name) at (2.5,13/4){};
+
+\node[solid,circle,minimum width=1.5ex,fill=blue,thick,draw, color=blue] (name) at (4.5,2){};
+\node[solid,circle,minimum width=1.5ex,fill=blue,thick,draw, color=blue] (name) at (3.7,2.5){};
+\node[solid,circle,minimum width=1.5ex,fill=blue,thick,draw, color=blue] (name) at (3,4.2){};
+ 
+ \foreach \Point in {(2.9,1.4), (2.3,.5), (3.3,.1), (2,0.9), (2.5,1)}{
+      \draw \Point node[rightNode]{};
+      }
+
+\addplot  [very thick,dotted] [color=red]    {5-3/2*x};
+%\addplot [color=red]    {x};
+%\addplot [color=green]  {e^x-5/2*x};
+\addplot [color=green]  {3-3/2*x};
+\addplot [color=green]  {7-3/2*x};
+
+\legend{$Median$, $Gutter$}
+
+
+%\draw [very thick,dotted] (2,\pgfkeysvalueof{/pgfplots/ymin}) -- (2,\pgfkeysvalueof{/pgfplots/ymax});
+%\draw [very thick,dotted] (\pgfkeysvalueof{/pgfplots/xmin},e^2-5/2*2) -- (\pgfkeysvalueof{/pgfplots/xmax},e^2-5/2*2);
+\end{axis}
+\end{tikzpicture}
+\caption{SVM2}
+\end{centre}
+\end{figure}
+%****************************************************
+%****************************************************
+\begin{equation}
+\vec{w} \cdot \vec{x_+} + b & \geq 1 
+\end{equation}
+\begin{equation}
+\vec{w} \cdot \vec{x_-} + b & \leq 1
+\end{equation}
+\begin{equation}
+\boxed{
+\vec{w} \cdot \vec{u} + b & \geq 0 \quad \text{then `+' Decision Rule}
+}
+\end{equation}
+We introduce $y_i$ for mathematical convenience. This will reduce the above two equation into 1 as shown in the next few equations. \\
+
+\begin{equation}
+  y_i =
+  \begin{cases}
+    +1 & \text{for $+$ samples} \\
+    -1 & \text{for $-$ samples}
+  \end{cases}
+\end{equation}
+
+\begin{equation}
+\boxed{y_i(\vec{w} \cdot \vec{x_i} + b) \geq 1}
+\end{equation}
+Taking $1$ to the LHS results in: \\
+\begin{equation}
+y_i(\vec{w} \cdot \vec{x_i} + b) - 1 \geq 0
+\end{equation}
+
+If the point $x_i$ lies on the gutter line, then:
+\begin{equation}
+y_i(\vec{w} \cdot \vec{x_i} + b) - 1 = 0
+\end{equation}
+There is no point in between the two gutter lines. 
+We are trying to get the two gutter lines such that the resulting street formed which separates the $+$ses from the $-$ses is wide as possible. \\
+It would be a good idea to express the distance between the two gutters.\\
+
+Insert Diagram here:
+A vector to the positive gutter line, $\vec{x}_+$, a vector to the negative gutter line, $\vec{x}_-$. 
+The difference of the two vectors would be : $\vec{x}_+ - \vec{x}_-$
+Now, if we have a unit normal that is normal to the median line of the street, then, the dot product of this difference vector and that of the unit normal would be the width of the street. But we have $\vec{w}$ which is normal to the median of the street. Hence, $\frac{\vec{w}}{||w||}$ i a unit vector normal to the median.\\
+\begin{equation}
+\text{WIDTH} = (\vec{x}_+ - \vec{x}_-) \cdot \frac{\vec{w}}{||w||}
+\end{equation}
+The above dot product is a scalar and is the width of the street. Now, using the equation $y_i(\vec{w} \cdot \vec{x_i} + b) - 1 = 0$ and considering two points one on each of the two gutter lines results in:\\
+\begin{align}
+\vec{x}_+ \cdot \vec{w} &= 1 - b \\
+\vec{x}_- \cdot \vec{w} &= 1 + b 
+\end{align}
+Resulting in,
+\begin{equation}
+\text{WIDTH} =  \frac{2}{||w||}
+\end{equation}
+The whole idea is to maximize the width of the street.
+\begin{equation}
+\text{MAX}  \frac{2}{||w||} \quad = \quad \text{MAX}  \frac{1}{||w||} 
+\end{equation}
+We dropped the constant. Now, maximizing $\frac{1}{||w||} $ is same as minimizing $||w||$ which would work well to minimize $\frac{||w||^2}{2} $. Why did we square and half it? Because it is mathematically convenient. :) \\
+\begin{equation}
+\boxed{
+\text{MIN} \quad \frac{||w||^2}{2}
+}
+\end{equation}
+Now honoring the constraints:\\
+To find the extremum of a function with constraints we have to use Lagrange multipliers. (See Appendix) That will give us a new expression which we can maximize or minimize without thinking about the constraints anymore. This takes us towards the box number 4. Min $\mathcal{L} = $ the minimization function minus the sum of the constraints weighted by a multiplier $\alpha_i$
+
+\begin{equation}
+\mathcal{L} = \frac{1}{2} ||\vec{w}||^2 - \sum \alpha_i [y_i(\vec{w}\cdot\vec{x}_i + b)-1]
+\end{equation}
+We got the original thing we trying to work with. Now, we have got Lagrange multipliers all multiplied to the constraints. Each constraint is constrained to be $0$. Now, with a lttle bit of mathematical slight of hand. The constraints for which Lagrange multipliers are zero are the ones lying away from the gutter line. There is a slack between them and the gutter line. The ones for which the Lagrange multipliers are non zero are the ones which lie on the gutter line. \\
+We are trying to find the extremum. So, we first take the First Order Condition [FOC], that is take the derivatives and set them to zero. Then, we take the Second Order Condition [SOC]  that is the second derivative and depending on the sign confirm maxima or a minima.\\
+
+\begin{equation}
+\frac{\partial \mathcal{L}}{\partial \vec{w}} = \vec{w} - \sum \alpha_i y_i x_i = 0 
+\end{equation}
+
+\begin{equation}
+\implies \boxed{ \vec{w} &=  \sum \alpha_i y_i \vec{x}_i}
+\end{equation}
+
+This tells us that the vector $\vec{w}$ is a linear sum of the samples, either all or some (for some $\alpha$ will be $0$) of the samples.\\
+Differentiating $\mathcal{L}$ wrt anything else that may vary:
+\begin{equation}
+\frac{\partial \mathcal{L}}{\partial b} = - \sum \alpha_i y_i = 0
+\end{equation}
+
+\begin{equation}
+\implies \boxed{\sum \alpha_i y_i = 0}
+\end{equation}
+
+Because of the square, this is a quadratic optimization problem. At this stage, numerical analysis ca be used to solve the problem. But, we would continue with more math. We are interested in the fact that the decision variable is a linear sum of the samples. Plugging the expression of $\vec{w}$ back in $\mathcal{L}$ expression (the optimization function), we get:  
+\begin{equation}
+\mathcal{L} = \frac{1}{2} (\sum \alpha_i y_i \vec{x}_i) \cdot (\sum \alpha_j y_j \vec{x}_j) - \sum \alpha_i y_i \vec{x}_i \cdot (\sum \alpha_j y_j \vec{x}_j) - \sum \alpha_i y_i b + \sum \alpha_i
+\end{equation}
+
+Now $\sum \alpha_i y_i = 0$ and writing the second part as $(\sum \alpha_i y_i \vec{x}_i) \cdot (\sum \alpha_j y_j \vec{x}_j)$, we get:
+
+\begin{equation}
+\boxed{
+\mathcal{L} = \sum \alpha_i - \frac{1}{2} \sum_i \sum_j \alpha_i \alpha_j y_i  y_j \boxed{ ( \vec{x}_i \cdot  \vec{x}_j ) }
+}
+\end{equation}
+This we can solve by numerical analysis. But then we could have done it at an earlier stage, why did we come till here? We did it to find out how the maximization depends on the sample vectors. \\
+\underline{
+The optimization depends only on the dot product of the pair of samples.}\\
+We want to take the $\vec{w}$ and stick it back not only in the Lagrangian but as well into the decision rule.\\
+\begin{equation}
+\sum \alpha_i y_i \boxed{ \vec{x}_i \cdot \vec{u} }+ b \geq 0 \quad  \text{THEN} \quad + 1
+\end{equation}
+
+$\vec{u}$ is the unknown vector. \\
+The decision rule also depends on the dot products of the sample and the unknowns. So, a total dependence of all of the math on the dot products. The optimization is done on a convex space, hence, the local maximum is the global maximum. So, in contrast with things like neural nets where you have a plague of local maxima, this guy never gets stuck in a local maxima. \\
+
+What happens in situations where the points are linearly inseparable, like in the following figure:\\
+INSERT FIGURE\\
+Then, a powerful idea comes to the rescue. When stuck switch to another perspective. Then we need a transformation which will take us from the space that we are currently in into a higher dimension space where things are more convenient, where the points become separable. Let's call the transformation $\phi(\vec{x})$. Since, we have seen that the maximization depends only on the dot product so all we need to do to maximize is to  take the transformation of one vector dotted with the transformation of another vector, $\phi(\vec{x}_i) \cdot \phi(\vec{x}_j)$ and maximize it. Now if we have a function $K$ such that:\\
+
+\begin{equation}
+K(x_i , x_j) = \phi(\vec{x}_i) \cdot \phi(\vec{x}_j)
+\end{equation}
+then we are done. This is called the KERNEL function and it provides us with the dot product of the two vectors in another space. We don't have to know the transformation into the other space. And that's the reason that this stuff is a miracle. Some of the popular kernels are :
+\begin{align}
+(\vec{u} \cdot \vec{v} + 1 )^n & \\
+e^{- \frac{||\vec{x}_i - \vec{x}_j||}{\sigma}}
+\end{align}
+We have got a general method which is convex and guaranteed to produce a global solution. We have got a mechanism that easily allows us to transform this into another space. But there are issues, for instance, if we chose $\sigma$ [the one in the exponential kernel above] small enough, then those sigmas are essentially shrunk right around the sample, and we could get overfitting. So, it doesn't immunize us against overfitting but it does immunize us against local maxima and does provide us with a general mechanism for doing a transformation into another space with a better perspective. \\
+The history of this is: Vapnik immigrated from the Soviet Union to the United States in 1991. Nobody had ever heard of this stuff before he immigrated. He actually had done this work on the basic support vector idea in id Ph.D. thesis at Moscow University. in the early 60's. But it wasn't possible for him to do anything with it, because he didn't have any computer that he could try it out with. So he spent the next 25 years in some oncolgy institute in the Soviet Union doing applications. Somebody form Bell labs, discovered him, invited him over to United States where he subsequently decided to immigrate. In around 1992, Vapnik submitted three papers to NIPS, the Neural Information Processing Systems journal. All of them were rejected!!! Around 1992-93 Bell labs was interested in hand-written character recognition and in neural nets. Vapnik thinks that neural nets are not very good. So he had a bet with a colleague for a good dinner, that the SVM will do eventually better at hand writing recognition than neural nets. So, the colleague decided to implement the SVM with a kernel with $n=2$, just slightly non linear. It worked like a charm! As soon as it was shown to work in early 90s on the problem of handwriting recognition, Vapnik resuscitated the idea of the kernel, began to develop it, and became the essential part of the whole approach of using SVMs. It was about 30 years in between the concept and anybody hearing about it.  
+
+
+
+
+
+\end{document}
