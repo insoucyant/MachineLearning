@@ -148,7 +148,7 @@ Transformer networks have 2 parts: Encoders and Decoders. In Machine translation
 %************************************************************************************
 \subsubsection{Encoder}
 %************************************************************************************
-The encoder processes an entire sentence in parallel as opposed to RNN which processes one word at a time in the sentence. Input in TIV is an entire sequence of word which are embedded and then positional encoding is done.
+The encoder processes an entire sentence in parallel as opposed to RNN which processes one word at a time in the sentence. Input in TIV is an entire sequence of words which are embedded and then positional encoding is done.
 \begin{minipage}{0.6\textwidth}
 \input{Transformer/Images/DiaEncoder}
 \end{minipage}
@@ -160,7 +160,7 @@ The important part of the transformer network is the encoder block. It consists 
 \end{itemize}
 \end{minipage}
 The Multi Head Attention is where all the good stuff happens. A vector which consists of sub-vectors of all the words that we have in our sentence is fed in.  Then the Multi Head Attention is going to compute the attention between every position and every other position. A vector which consists of subvectors of all the words we have in our sentence is fed in. Then the Multi Head Attention is going to compute the attention between every position and every other position. \\
-We have vectors 
+We have vectors that embed the word in each of those positions \& now we simply \textit{  \textcolor{red}{  carry out an attention computation that will essentially treat each word as a query then find some keys that corresponds to the other words in the sentence \& then take a convex combination of the corresponding values. Here the values are going to be the same as the keys \& then take a distribution of that to produce a better embeddings.}} 
 
 %************************************************************************************
 \subsubsection{Decoder}
