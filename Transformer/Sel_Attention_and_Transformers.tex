@@ -1,6 +1,10 @@
 \documentclass{article}
 \usepackage[utf8]{inputenc}
-\usepackage{graphicx, amsmath, amssymb}
+\usepackage{graphicx, amsmath, amssymb, tikz}
+\usepackage{hhline}
+\usepackage[table]{xcolor}
+\usepackage[most]{tcolorbox}
+\usepackage{lipsum}
 \usepackage{hyperref}
 \graphicspath{ {./images/} }
 \usepackage[dvipsnames]{xcolor}
@@ -22,14 +26,101 @@ This is a test. That is an abstract.  T This is a test. That is an abstract.
 \keywords{Postional Encoding, Rotary Positional Embeddings, Positional Embeddings, Context Vectors}
 %*********************************************************************************************
 \section{Motivation for Transformers}
-\begin{itemize}
-    \item Sequential computation prevents parallelization
+\begin{tcbraster}[raster columns=2,raster equal height,nobeforeafter,raster column skip=0.5cm]
+  \begin{tcolorbox}[title=Challenges with RNNs]
+    \begin{itemize}
+    \item Gradient vanishing and explosion
+    \item Large \# of training steps
+    \item Sequential computation/Recurrenece prevents parallel computation
     \item Despite GRUs and LSTMs, RNN still need attention mechanism to deal with long-range dependencies - path length for co-dependent computation between states grows with sequence length
-    \item But if attention gives us access to any state, maybe we don't need the RNN?!
 \end{itemize}
-
+  \end{tcolorbox}
+  \begin{tcolorbox}[title=Transformer Networks]
+    \begin{itemize}
+    
+    \item No gradient vanishing and explosion
+    \item Fewer training steps
+    \item No recurrence that faciliate parallel computation
+    \item Facilitate Long Range Dependencies
+\end{itemize}
+  \end{tcolorbox}
+\end{tcbraster}
+But if attention gives us access to any state, maybe we don't need the RNN?!
 %*********************************************************************************************    
-\section{Transformers}
+\section{Attention Mechanism}
+%*********************************************************************************************
+%*********************************************************************************************   
+\begin{minipage}{0.5\textwidth}
+\includegraphics[width=5cm, height=3.5cm]{Transformer/Images/Attention1.png}
+\end{minipage}
+\begin{minipage}{0.5\textwidth}
+\begin{itemize}
+    \item Mimics the retrieval of a \textbf{value} $v_i$ for a \textbf{query} $q$ based on a key $k_i$ in database.
+    \item $attention(q,\textbf{k},\textbf{v}) = \sum_i similarity(q,k_i)\times v_i$
+    \item $s_i = f(q,k_i)$
+\end{itemize}
+\end{minipage}
+%************************************************************************************
+%*********************************************************************************************  
+\hrule
+\textbf{Step 1}: \\
+\begin{minipage}{.65\linewidth}
+\begin{equation*}
+  f(q,k_i)=\begin{cases}
+    q^T k_i, & \text{Dot Product}.\\
+    \frac{q^T k_i}{\sqrt{d}}, & \text{Scaled Dot Product}.\\
+    q^T W k_i, & \text{General Dot Product}. \\
+    w_q^T q + W_k^T k_i , & \text{Additive Similarity}
+  \end{cases}
+\end{equation*}
+\end{minipage}
+\begin{minipage}{.5\linewidth}
+\includegraphics[width=4cm, height=3.5cm]{Transformer/Images/Attention2.png}
+\end{minipage}
+%************************************************************************************
+$s$ corresponds to the similarity measure. $d$ is the dimensionality of each key. $W$: Think of it as if we are transforming our queries to be in the same space as the keys. Kernel methods also measure similarity. They do this by essentially mapping two vectors into a new space through some non-linear function. We could also have here some form of kernel similarity.  \\
+\hrule
+\textbf{Step 2}:\\
+%*********************************************************************************************   
+\begin{minipage}{0.5\textwidth}
+\includegraphics[width=4cm, height=3.5cm]{Transformer/Images/Attention3.png}
+
+\end{minipage}
+\begin{minipage}{0.5\textwidth}
+\begin{itemize}
+    \item The second step/layer is to compute the weights $a_1,a_2,a_3,a_4$.
+    \item $a_i = \frac{exp(s_i)}{\sum_j exp(s_j}$. 
+    \item This is a fully connected network but not in the classical sense. 
+\end{itemize}
+\end{minipage}
+%************************************************************************************
+\hrule 
+\textbf{Step 3}:\\
+%*********************************************************************************************   
+\begin{minipage}{0.5\textwidth}
+
+\begin{itemize}
+    \item Attention Value $= \sum_i a_i * v_i$.
+    \item $a_i = \frac{exp(s_i)}{\sum_j exp(s_j}$. 
+    \item This is a fully connected network but not in the classical sense. 
+\end{itemize}
+\end{minipage}
+\begin{minipage}{0.5\textwidth}
+\includegraphics[width=6cm, height=5cm]{Transformer/Images/Attention4.png}
+\end{minipage}
+%************************************************************************************
+\begin{itemize}
+    \item Neural Architecture
+    \item Example: machine translation
+    \begin{itemize}
+        \item Query: $s_i$ (hidden vector for $i^{th}$ output word )
+        \item Key: $h_j$ (hidden vector for $j^{th}$ input word)
+        \item Value: $h_j$ (hidden vector for $j^{th}$ input word)
+    \end{itemize}
+\end{itemize}
+  
+%*********************************************************************************************    
+\section{Transformer Network}
 %*********************************************************************************************   
 \begin{minipage}{0.5\textwidth}
 \includegraphics[width=6cm, height=8cm]{Transformer/Images/Transformers1.png}
@@ -38,6 +129,7 @@ This is a test. That is an abstract.  T This is a test. That is an abstract.
 \begin{itemize}
     \item The work "Attention is All you Need" (Vaswani et al, NeurIPS 2017) first made it possible to do Seq2Seq modelling without RNNs)
     \item Proposed transformer model, entirely built on self-attention mechanism without using sequence-aligned recurrent architectures
+    \item Encoder-decoder based on attention (no recurrence)
     \item Key components:
     \begin{itemize}
         \item Self-Attention
@@ -47,6 +139,33 @@ This is a test. That is an abstract.  T This is a test. That is an abstract.
     \end{itemize}
 \end{itemize}
 \end{minipage}
+Recurrence means that the optimization takes longer for 2 reasons: -
+\begin{itemize}
+    \item \# of iterations, \# of steps in gradient descent will be higher
+    \item We will have several operations that are going to be sequential \& then we cannot parallelize them easily
+\end{itemize}
+Transformer networks have 2 parts: Encoders and Decoders. In Machine translation, the encoder is used to encode the initial sentence and the decoder is used to produce the translated sentence. 
+%************************************************************************************
+\subsubsection{Encoder}
+%************************************************************************************
+The encoder processes an entire sentence in parallel as opposed to RNN which processes one word at a time in the sentence. Input in TIV is an entire sequence of word which are embedded and then positional encoding is done.
+\begin{minipage}{0.6\textwidth}
+\input{Transformer/Images/DiaEncoder}
+\end{minipage}
+\begin{minipage}{0.5\textwidth}
+The important part of the transformer network is the encoder block. It consists of two sub-parts:
+\begin{itemize}
+    \item Multi-head Attention
+    \item Feed Forward Neural Network
+\end{itemize}
+\end{minipage}
+The Multi Head Attention is where all the good stuff happens. A vector which consists of sub-vectors of all the words that we have in our sentence is fed in.  Then the Multi Head Attention is going to compute the attention between every position and every other position. A vector which consists of subvectors of all the words we have in our sentence is fed in. Then the Multi Head Attention is going to compute the attention between every position and every other position. \\
+We have vectors 
+
+%************************************************************************************
+\subsubsection{Decoder}
+%************************************************************************************
+D
 %************************************************************************************
 \subsubsection{Transformers in a Nutshell}
 \begin{minipage}{0.5\textwidth}
@@ -130,16 +249,27 @@ This is a test. That is an abstract.  T This is a test. That is an abstract.
 \section{Multi-Head Attention}
 %************************************************************************************
 %************************************************************************************
+\begin{itemize}
+    \item Multihead attention: compute multiple attentions per query with different weights
+    \item $multihead(Q,K,V) = W^0 concat(head_1, head_2, \cdot , head_h)$ 
+    \item $ head_i = attention(W_i^QQ, W_i^K K, W_i^V V )$
+    \item $attention(Q,K,V) = softmax(\frac{Q^T K}{\sqrt{d_k}} )V$ 
+\end{itemize}
+
+
+
+%************************************************************************************
 \begin{minipage}{0.5\textwidth}
 \includegraphics[width=6cm, height=8cm]{Transformer/Images/MultiHeadAttention1.png}
 \end{minipage}
 \begin{minipage}{0.5\textwidth}
 \begin{itemize}
-    \item Improves performance of teh attention layer in two ways:
+    \item Improves performance of the attention layer in two ways:
     \begin{itemize}
         \item Expands model's ability to focus on different positions. In example above, $z_1$ contains a bit of every other encoding, but dominated by actual word itself.
         \item Gives attention layer multiple "representation subspaces"; we have not one but multiple sets of Query/Key?value weight matrices; after training, each set is used to project input embeddings into different representation subspaces
     \end{itemize}
+    \item $h \rightarrow $ \# of head 
 \end{itemize}
 \end{minipage}
 %************************************************************************************
@@ -155,14 +285,35 @@ This is a test. That is an abstract.  T This is a test. That is an abstract.
     \item Concatenate the resulting \textcolor{pink}{Z} matrices, then multiply with weight matrix \textcolor{pink}{$W^0$} to produce the output of the layer
 \end{itemize}
 \end{minipage}
-*In all encoders other than #0, we don't need embedding. We start directly with the output of the encoder right below this one.
+$\ast$ In all encoders other than 0, we don't need embedding. We start directly with the output of the encoder right below this one.
+%************************************************************************************
+\subsection{Masked Multi-head Attention}
+\begin{itemize}
+    \item Masked multi-head attention: multi-head where some values are masked (i.e., probabilities of masked values are nullified to prevent them from being selected)
+    \item When decoding, an output value should only depend on previous outputs (not future outputs). Hence we mask future outputs.
+    \item $attention(Q,K,V) = softmax(\frac{Q^T K}{\sqrt{d_k}})V$
+    \item $maskedAttention(Q,K,V) = softmax(\frac{Q^T K + M}{\sqrt{d_k}})$
+    \item where $M$ is a mask matrix of $0$'s and $-\infty$'s
+\end{itemize}
+%************************************************************************************
+\subsection{Other Layers}
+\begin{itemize}
+    \item Layer Normalization
+    \begin{itemize}
+        \item Normalize value in each layer to have $0$ mean and $1$ variance
+        \item For each hidden unit $h_i$ compute $h_i \leftarrow  \frac{g}{\sigma} (h_i - \mu)$ where $g$ is a variable, $\mu = \frac{1}{H} \sum_{i=1}^H h_i$ and $\sigma = \sqrt{\frac{1}{H} \sum_{i=1}^H (h_i - \mu)^2 }$
+        \item This reduces "covariate shift" (i.e., gradient dependencies between each layer) and therefore fewer training iterations are needed
+    \end{itemize}
+    \item Positional Embeddings
+\end{itemize}
 %************************************************************************************
 %************************************************************************************
 \section{Positional Encoding}
 %************************************************************************************
 %************************************************************************************
 \begin{itemize}
-    \item Unlike RNN and CNNN encoders, attention encoder outputs do not depend on order of inputs (Why?)
+    \item Embedding to distinguish each position
+    \item Unlike RNN and CNN encoders, attention encoder outputs do not depend on order of inputs (Why?)
     \item But order of sequence conveys important information for machine translation tasks and language modeling
     \item The idea: Add positional information of input token in the sequence into input embedding vectors
 \end{itemize}
@@ -172,7 +323,29 @@ This is a test. That is an abstract.  T This is a test. That is an abstract.
 \end{align*}
 \begin{itemize}
     \item Final input embeddings are concatenation of learnable embedding and positional encoding
+    \item position is scalar. Position embedding is vector.
 \end{itemize}
+%************************************************************************************
+%************************************************************************************
+\section{Conclusion}
+%************************************************************************************
+%************************************************************************************
+\begin{itemize}
+    \item Attention reduces sequential operations and maximum path length, which facilitates long range dependencies
+\end{itemize}
+\begin{tabular}{ |p{4cm}||p{2cm}|p{2cm}|p{3cm}|  }
+ \hline
+ \multicolumn{4}{|c|}{Comparison} \\
+ \hline
+ Layer Type& Complexity per Layer &Sequential Operations & Maximum Path Length\\
+ \hline
+ Self-Attention   & $O(n^2 \cdot d)$     & $ O(1) $ &   $ O(1) $\\
+ Recurrent &   $O(n \cdot d^2)$  & $ O(n) $   & $ O(n) $\\
+ Convolutional & $O(k \cdot n \cdot d^2)$  & $ O(1) $ &  $ O( log_k(n) ) $\\
+ Self-Attention(restricted)    & $O(r \cdot n \cdot d^2)$  & $ O(1) $ &   $ O(n/r) $\\
+ \hline
+\end{tabular}
+\end{document}
 %************************************************************************************
 %************************************************************************************
 \section{References}
@@ -182,5 +355,6 @@ This is a test. That is an abstract.  T This is a test. That is an abstract.
     \item \href{https://courses.cs.washington.edu/courses/cse543/22sp/schedule/lecture15_transformer.pdf}{CS Washington}
     \item \href{https://www.youtube.com/watch?v=5V9gZcAd6cE}{Positional encodings in transformers (NLP817 11.5)}
     \item \href{https://www.cs.ubc.ca/~schmidtm/Courses/440-W22/L20.pdf}{CPSC 440}
+    \item \href{https://www.cs.toronto.edu/~rgrosse/courses/csc421_2019/slides/lec16.pdf}{CS Toronto CSC 421}
 \end{itemize}
 \end{document}

@@ -1,18 +1,21 @@
+% Import required TikZ libraries
 \documentclass{article}
 \usepackage{tikz}
-\usetikzlibrary{shapes, arrows, positioning, fit, backgrounds}
+\usetikzlibrary{shapes,shadows, arrows, positioning, fit, backgrounds}
 % \begin{document}
+
+
 
 % Define block styles
 \tikzstyle{decision} = [diamond, draw, fill=yellow!40, 
     text width=4.5em, text badly centered, node distance=1.75cm, inner sep=0pt]
 \tikzstyle{decisiong} = [diamond, draw, fill=blue!40, 
     text width=4.5em, text badly centered, node distance=1.75cm, inner sep=0pt]
-\tikzstyle{block} = [rectangle, node distance=1.75cm, minimum width=1cm, minimum height=0.5cm, draw, fill=yellow!20, 
+\tikzstyle{block} = [rectangle, node distance=1.75cm, minimum width=1cm, minimum height=0.5cm, draw, fill=yellow!10, 
     text width=20em, text centered, rounded corners, minimum height=1.5em]
-\tikzstyle{blockg} = [rectangle, minimum width=0.5cm, minimum height=0.5cm, draw, fill=blue!50, 
+\tikzstyle{blockg} = [rectangle, minimum width=0.5cm, minimum height=0.5cm, draw, fill=blue!10, 
     text width=15em, text centered, rounded corners, minimum height=1.5em]
-\tikzstyle{blockh} = [rectangle, minimum width=0.5cm, minimum height=0.5cm, draw, fill=green!50, 
+\tikzstyle{blockh} = [rectangle, minimum width=0.5cm, minimum height=0.5cm, draw, fill=green!10, 
     text width=15em, text centered, rounded corners, minimum height=1.5em]
 \tikzstyle{blockwhite} = [rectangle, minimum width=0.5cm, minimum height=0.5cm, draw, fill=white!50, 
     text width=15em, text centered, rounded corners, minimum height=1.5em]
@@ -32,19 +35,19 @@
     % Place nodes
     \node [cloud] (exit) {};
 
-    \node [blockh, below of=exit] (ln1) {Layer Norm};
+    \node [blockh, below of=exit] (ln1) {Add \& Norm};
     \node [blockg, below of=ln1] (ff) {\textbf{Feed-forward}};
     \node [cloud, below of=ff] (mid) {};
-    \node [blockh, below of=mid] (ln2) {Layer Norm};
+    \node [blockh, below of=mid] (ln2) {Add \& Norm};
     
-    \node [blockg, below of=ln2] (sa) {\textbf{Self-Attention} };
+    \node [blockg, below of=ln2] (sa) {\textbf{Multi-head Attention} };
     \node [cloud, below of=sa] (init) {};
     \node [blockwhite, below of=init] (input) {Encoder };
 
  
 
     \begin{scope}[on background layer]
-    \node[draw, fill=blue!20, fit=(sa) (ln1), inner xsep=5mm]{};
+    \node[draw, fill=blue!0, fit=(sa) (ln1), inner xsep=5mm]{};
     \end{scope}
     % Draw edges
     \path [line] (ln1) -- (exit);
