@@ -23,7 +23,7 @@ This is a test. That is an abstract.  T This is a test. That is an abstract.
 \end{abstract}
 
 \hspace{0.5in}
-\keywords{Postional Encoding, Rotary Positional Embeddings, Positional Embeddings, Context Vectors}
+\keywords{Positional Encoding, Rotary Positional Embeddings,Embedding, Positional Embeddings, Context Vectors, Residual Connection, Layer Normalization}
 %*********************************************************************************************
 \section{Motivation for Transformers}
 \begin{tcbraster}[raster columns=2,raster equal height,nobeforeafter,raster column skip=0.5cm]
@@ -40,7 +40,7 @@ This is a test. That is an abstract.  T This is a test. That is an abstract.
     
     \item No gradient vanishing and explosion
     \item Fewer training steps
-    \item No recurrence that faciliate parallel computation
+    \item No recurrence that facilitate parallel computation
     \item Facilitate Long Range Dependencies
 \end{itemize}
   \end{tcolorbox}
@@ -144,7 +144,7 @@ Recurrence means that the optimization takes longer for 2 reasons: -
     \item \# of iterations, \# of steps in gradient descent will be higher
     \item We will have several operations that are going to be sequential \& then we cannot parallelize them easily
 \end{itemize}
-Transformer networks have 2 parts: Encoders and Decoders. In Machine translation, the encoder is used to encode the initial sentence and the decoder is used to produce the translated sentence. 
+Transformer networks have 2 parts: Encoders and Decoders. In Machine translation, the encoder is used to encode the initial sentence, and the decoder is used to produce the translated sentence. 
 %************************************************************************************
 \subsubsection{Encoder}
 %************************************************************************************
@@ -159,13 +159,20 @@ The important part of the transformer network is the encoder block. It consists 
     \item Feed Forward Neural Network
 \end{itemize}
 \end{minipage}
-The Multi Head Attention is where all the good stuff happens. A vector which consists of sub-vectors of all the words that we have in our sentence is fed in.  Then the Multi Head Attention is going to compute the attention between every position and every other position. A vector which consists of subvectors of all the words we have in our sentence is fed in. Then the Multi Head Attention is going to compute the attention between every position and every other position. \\
-We have vectors that embed the word in each of those positions \& now we simply \textit{  \textcolor{red}{  carry out an attention computation that will essentially treat each word as a query then find some keys that corresponds to the other words in the sentence \& then take a convex combination of the corresponding values. Here the values are going to be the same as the keys \& then take a distribution of that to produce a better embeddings.}} 
+The Multi Head Attention is where all the good stuff happens. A vector which consists of sub-vectors of all the words that we have in our sentence is fed in.  Then the \textit{Multi Head Attention} is going to compute the attention between every position and every other position. A vector which consists of sub-vectors of all the words we have in our sentence is fed in. Then the Multi Head Attention is going to compute the attention between every position and every other position. \\
+We have vectors that embed the word in each of those positions \& now we simply \textit{\textcolor{red}{carry out an attention computation that will essentially treat each word as a query then find some keys that corresponds to the other words in the sentence \& then take a convex combination of the corresponding values. Here the values are going to be the same as the keys \& then take a distribution of that to produce a better embeddings.}} \\
+The Multi-Head-Attention will essentially take every word, combine it with some of the other words through the attention mechanism to essentially produce better embeddings that merge together information from pairs of words. When we do this in one encoder block, we essentially look at pairs of words together. We repeat the encoder block $N$ times ($N$ stacks). In the first block, we are looking at pairs. In the second block, we are looking at pairs of pairs.  We are now combining more than just two words: groups of words that get larger and larger. \\
+Then we  have another layer \textit{Add \& Norm}. This adds the original input and the output from Multi Head Attention. Then it normalizes it with zero mean and unit variance.\\
+This output is fed into a \textit{feed forward} network whose output, along with residual connection addition, is finally normalized.\\
+The above is the encoder block which is repeated $N$ times. This means we not only combine pairs of words but also pairs of pairs of words and so on. Eventually, we combine together all the words in the sentence. \\
+The output of the encoder block is a sequence of embeddings. There is going to be one embedding per position. The embedding captures not only the original word at this position but also information from the other words that it attended to throughout the network. Eventually, it is a large embedding of all those words corresponding to each position. This is our final encoding of the input sentence. \\
 
 %************************************************************************************
 \subsubsection{Decoder}
 %************************************************************************************
-D
+The Decoder follows the encoder and does something similar. The main purpose of the decoder is to produce some output and not just embed. So we have additional stuff at the top - softmax. Softmax outputs the probabilities for outputting a label in each position. The decoder block also repeats $N$ times. \\
+Inside the decoder block we have first a Multi Head Attention that looks at combining output words with previous output words. There is a second block of Multi Head Attention that now combines output words with input words. Finally, a feed forward network.  Hence, we have two layers of attention in the decoder.  The first layer is for self attention between the output words. The problem with output words is when you generate a sequence of output you can only generate the next words based on previous words. So, when you do the attention you need to be careful to attend only to the previous words. This is why it is called a \textit{Masked Multi Head Attention}. The future word is masked, each word is only attending to the previous words. The second Multi Head Attention in the decoder is making sure that each position in the output is attending to the positions in the input. Whenever you produce an output it's good if you can peek and look back at what was your input sentence. Hence we are going to look at the embeddings of each position in the input and hence the arrows from the encoder to the decoder. The Decoder is also repeated $N$ times. The idea is we gradually built up combinations and then get better and better embeddings unless we produce an output. \\
+The output is a distribution over the words in a dictionary. Every position is a word that we are trying to generate.
 %************************************************************************************
 \subsubsection{Transformers in a Nutshell}
 \begin{minipage}{0.5\textwidth}
@@ -188,8 +195,36 @@ D
     \item "it" refers to "animal" in the first case, but to "street" in the second case
     \item This is hard for traditional \textit{Seq2Seq} models to model.
     \item As the model processes each word, self-attention allows it to look at other positions in the input sequence to help get a better encoding. 
-    \item Recall RNNs: we now no longer need to maintain a hidden state to incorporate representation of previous words/vectors!
+    \item Recall RNNs: we now no longer need to maintain a hidden state to incorporate the representation of previous words/vectors!
 \end{itemize}
+%************************************************************************************
+\subsection{Self-Attention: keys, queries, values from the same sequence}
+Let $\textbf{w}_{1:n}$ be a sequence of words in vocabulary $V$, like \textit{I am a cartoon}. For each $\textbf{w}_i$ , let $\textbf{x}_i = E w_i$ , where $E \in \mathbb{R}^{d \times |V|}$ is an embedding matrix.  \\
+
+\begin{itemize}
+    \item Transform each word embedding with weight matrices $Q,K,V$, each in $\mathbb{R}^{d \times d}$
+        \begin{align*}
+            q_i &= Q x_i &\qquad & \text{(queries)} \\
+            k_i &= K x_i && \text{(keys)} \\
+            v_i &= V x_i && \text{(values)} 
+        \end{align*}
+    \item Compute pairwise similarities between keys and queries; normalize with softmax
+        \begin{align*}
+            e_{ij} &= q_i^T k_j \\
+            \alpha_{ij} &= \frac{exp(e_{ij})}{\sum_{j'} exp(e_{ij'})}
+        \end{align*}
+    \item Compute output for each word as weighted sum of values
+        \begin{align*}
+            o_i = \sum_j \alpha_{ij} v_i 
+        \end{align*}
+\end{itemize}
+\includegraphics[width=6cm, height=6cm]{Transformer/Images/Attention5.png} \\
+\includegraphics[width=10cm, height=6cm]{Transformer/Images/Attention6.png}
+\begin{align*}
+    
+\end{align*}
+
+\subsection{Next}
 %************************************************************************************
 \begin{minipage}{0.5\textwidth}
 \includegraphics[width=6cm, height=6cm]{Transformer/Images/SelfAttention1.png}
@@ -244,6 +279,10 @@ D
 \includegraphics[width=6cm, height=5cm]{Transformer/Images/SelfAttention5.png}
 \end{minipage}
 
+For each attention head \textbf{we need a query, key and value vector for each input token}. We then compute \textbf{attention score} as the softmax over the \textbf{scaled dot product} between one query and all key vectors in the sentence. The equation below computes an \textbf{  attention-weighted } average over all value vectors for each input token at once. \textbf{Q} is the matrix that stacks \textbf{q}uery vectors for all input tokens: \textbf{K} and \textbf{V} do the same for \textbf{k}ey and \textbf{v}alue vectors.
+\begin{equation}
+    Attention(Q,K,V) = softmax (\frac{QK^T}{\sqrt{d_k}})V
+\end{equation}
 %************************************************************************************
 %************************************************************************************
 \section{Multi-Head Attention}
@@ -345,7 +384,7 @@ $\ast$ In all encoders other than 0, we don't need embedding. We start directly 
  Self-Attention(restricted)    & $O(r \cdot n \cdot d^2)$  & $ O(1) $ &   $ O(n/r) $\\
  \hline
 \end{tabular}
-\end{document}
+
 %************************************************************************************
 %************************************************************************************
 \section{References}
@@ -356,5 +395,7 @@ $\ast$ In all encoders other than 0, we don't need embedding. We start directly 
     \item \href{https://www.youtube.com/watch?v=5V9gZcAd6cE}{Positional encodings in transformers (NLP817 11.5)}
     \item \href{https://www.cs.ubc.ca/~schmidtm/Courses/440-W22/L20.pdf}{CPSC 440}
     \item \href{https://www.cs.toronto.edu/~rgrosse/courses/csc421_2019/slides/lec16.pdf}{CS Toronto CSC 421}
+    \item \href{https://web.stanford.edu/class/cs224n/slides_w25/cs224n-2025-lecture08-transformers.pdf}{Stanford CS 224n}
+    \item \href{https://jorisbaan.nl/2022/03/25/implementing-a-transformer-from-scratch.html}{Joris Baan}
 \end{itemize}
 \end{document}
