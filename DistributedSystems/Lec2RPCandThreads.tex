@@ -1,0 +1,28 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx, amsmath}
+\usepackage{hyperref}
+\graphicspath{ {./images/} }
+\usepackage[dvipsnames]{xcolor}
+
+\title{Distributed Systems - RPC and Threads}
+\author{Sumit Singh}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Threads}
+Threads are main tools to manage concurrency in programs. One program needs to talk to a bunch of other computers. Client may talk to many servers. A server maybe serving requests at the same time on behalf of many different clients. My program has 7 different things going on because it is talking to 7 different clients and we want that to be handled well. In the language Go, go routine is same as threads. \\
+The way to think of threads is that you have a program: one program and one address space. Within tht address space in a serial program without threads, you have one thread of execution, executing that code in that address space. One program counter, one set of registers, one stack. That describes the current state of the execution.\\
+In threaded program (such as Go), you can have multiple threads. Especially if the threads are executing at the same time for each you have a separate program counter, a separate set of register and a separate stack. They can have their own thread of control and they can be executing each thread in a different part of the program. 
+\section{Introduction}
+
+\section{Regression Trees}
+
+\section{References}
+\begin{itemize}
+    \item \href{https://www.youtube.com/watch?v=gA4YXUJX7t8}{Lecture 2: RPC and Threads}
+\end{itemize}
+\end{document}

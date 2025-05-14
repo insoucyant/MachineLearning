@@ -53,7 +53,7 @@ So, like in a Seq2Seq model, we generate output in a loop and feed the output se
 The difference from the Seq2Seq model is that, at each timestep, we re-feed the entire output sequence generated thus far, rather than just the last word. \\
 
 \begin{enumerate}
-    \item The input sequence is converted into Embeddings (with Postion Encoding) and fed to teh Encoder.
+    \item The input sequence is converted into Embeddings (with Position Encoding) and fed to the Encoder.
     \item The stack of Encoders processes this and produces and encoded representation of the input sequence.
     \item Instead of the target sequence, we use an empty sequence with only  a start-of-sentence token. This is converted into Embeddings (with Position Encoding) and fed to the Decoder. 
     \item The stack of Decoders processes this along with the Encoder stack's encoded representation of the target sequence. 
