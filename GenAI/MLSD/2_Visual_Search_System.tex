@@ -1,0 +1,172 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx, amsmath}
+\usepackage{hyperref}
+\graphicspath{ {./images/} }
+\usepackage[dvipsnames]{xcolor}
+\usepackage{titlesec}
+
+\setcounter{secnumdepth}{4}
+
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+\title{Visual Search System}
+\author{Sumit Singh}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+%******************************************************
+\section{Introduction}
+A \textit{Visual Search System} helps users discover images that are visually similar to a selected image. In this chapter, we design a visual search system similar to Pinterest's. \\
+The results are ranked from the most similar to the least similar to the \textit{query image}. \\
+Let us summarize the problem statement. We are asked to \textit{design a visual search system}. The system retrieves images similar to the query image provided by the user, ranks them based on their similarities to the query image, and then displays them to the user. The platform only supports images, with no video or text queries allowed. For simplicity, no personalization is required. 
+
+%******************************************************
+
+
+
+
+
+
+
+
+
+%******************************************************
+\section{Framing as ML}
+%******************************************************
+In this section, we choose a well-defined ML objective and frame the visual search problem as an ML task.
+\subsection{Defining the ML Objective}
+In order to solve this problem using an ML model, we need to create a well-defined ML objective. A potential ML objective is to accurately retrieve images that are visually similar to the image the user is searching for. 
+\subsection{Specifying input and output}
+The input of the \textit{visual search system} is a \textit{query image} provided by the user. The system outputs images that are visually similar to the query image, and the output images are ranked by similarity.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.5\linewidth]{GenAI/Images/VSS1IO.png}
+    \caption{A Visual Search System's input-output}
+    \label{fig:placeholder}
+\end{figure}
+
+\subsection{Choosing the right ML Category}
+The output of the model is a set of ranked images that are similar to the query image. As a result, visual search systems can be framed as a  \textit{ranking problem}. In general, the goal of ranking problems is to rank a collection of items, such as images, websites, products, etc. based on their relevance to a query, so that more relevant items appear higher in the search results. \textit{  Many ML applications, such as recommendation systems, search engines, document retrieval, and online advertising, can be framed as ranking problems}. We will use \textit{representation learning}. \\
+\textbf{Representation Learning}: In representation learning, a model is trained to transform input data, such as images, into representations called embeddings. The model maps input images to points in an N-dimensional space called embedding space. The embeddings are learned so that similar images have embeddings that are in close proximity to each other in the space. 
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.8\textwidth]{GenAI/Images/Ch2VSSFig2.jpg}
+  \caption{Similar Images in the embedding space}
+  \label{fig:yourlabel}
+\end{figure}
+Fig 2 illustrates how two similar images are mapped onto two points in close proximity within the embedding space. To demonstrate, we visualize image embeddings (denoted by 'x') in a 2-dimensional space. In reality, the space is $N$-dimensional, where $N$ is the size of the \textit{embedding vector}.\\
+\textbf{\textit{  How to rank images using representation learning?}} \\
+\begin{itemize}
+    \item First, the input images are transformed into \textit{embedding vectors}.
+    \item Next, we calculate \textit{similarity scores} between the query image and other images on the platform by measuring their distances in the \textit{embedding space}.
+    \item The images are \textit{ranked}  by similarity score.
+\end{itemize}
+Few of the questions that need to be answered are:
+\begin{itemize}
+    \item \textit{How can we ensure that similar images are placed close to each other in the embedding space?}
+    \item \textit{How can we define similarity?}
+    \item \textit{How can one train such a model?}
+\end{itemize}
+
+%******************************************************
+\section{Data Preparation}
+%******************************************************
+\subsection{Data Engineering}
+Aside from generic data engineering fundamentals, it's important to understand what data is available. As a visual search system mainly focuses on users and images, we have the following data available:
+\begin{itemize}
+    \item Images
+    \item Users
+    \item User-image interaction
+\end{itemize}
+\subsubsection{Images}
+Creators upload images, and the system stores the images and their metadata, such as owner id, \textbf{contextual information} (e.g., upload time), tags, etc.
+\subsubsection{Users}
+User data contains \textbf{demographic attributes} associated with users, such as age, gender, etc.
+\subsubsection{User-image interactions}
+Interaction data contains different types of user \textbf{interactions}. The primary type of interactions are \textit{impressions \& clicks}.
+\subsection{Feature Engineering}
+This section is about engineering great features and preparing them as model inputs. This usually depends on how we framed the task and what the model's inputs are. We have framed the visual search system as a ranking problem and used representation learning to solve it. The model expects an image as an input. The common image preprocessing operations are:
+\begin{itemize}
+    \item \textbf{Resizing}: Models usually require fixed image size (e.g.,$224 \times 224$)
+    \item \textbf{Scaling}: Scale pixel values of the image to the range of 0 and 1
+    \item \textbf{Z-score normalization}: Scale pixel values to have a mean of 0 and variance of 1
+    \item \textbf{Consistent color mode} Ensuring images have a consistent color mode (e.g., RGB or CMYK)
+\end{itemize}
+
+%******************************************************
+\section{Model Development}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{GenAI/Images/ch2vision-transformer-vit.png}
+    \caption{Vision Transformer, ViT}
+    \label{fig:placeholder}
+\end{figure}
+%******************************************************
+\subsection{Model Selection}
+We choose neural networks because:
+\begin{itemize}
+    \item Neural networks are good at handling unstructured data, such as images and text
+    \item Unlike many traditional machine learning models, neural networks are able to produce the embeddings we need for representation learning
+\end{itemize}
+What type of neural network architectures should we use? It is essential that the architecture works with images. CNN-based architectures such as ResNet or more recent Transformer-based architectures such as ViT perform well with image inputs. The next figure shows a simplified model architecture that transforms the input image into an embedding vector.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.75\linewidth]{GenAI/Images/Vh2VSSFig5SimplifiedModelArchitecture.jpg}
+    \caption{A simplified model architecture}
+    \label{fig:placeholder}
+\end{figure}
+The following \textit{hyperparameter} are chosen via experimentation:
+\begin{itemize}
+    \item \textit{The number of convolution layers}
+    \item \textit{The number of neurons in fully connected layers}
+    \item \textit{The size of the embedding vector}
+\end{itemize}
+\subsection{Model Training}
+In order to \textit{retrieve visually similar images, a model must learn representations (embeddings) during training}. \textit{How to train a model to learn image representations?} \\
+A common technique for learning image representation is \textbf{\textit{Contrastive Training}}
+
+Key components in \textit{Contrastive Learning} are:
+\begin{itemize}
+    \item Encoder: Neural Networks that map input data (like image or text) to embeddings
+    \item Similarity Function: Often Cosine similarity or dot product or Euclidean distance
+    \item Loss Function:
+    \begin{itemize}
+        \item Contrastive Loss: Used in Siamese network
+        \item Triplet Loss: Uses (anchor, positive, negative) 
+        \item NT-Xent Loss (Normalized Temperature-scaled Cross Entropy); Used in SimCLR
+    \end{itemize}
+\end{itemize}
+\subsection{Constructing the dataset}
+\subsection{Choosing the loss function}
+%******************************************************
+\section{Evaluation}
+%******************************************************
+\subsection{Offline Metrics}
+\begin{itemize}
+    \item Mean Reciprocal Rank (MRR)
+    \item Recall@k
+    \item Precision@k
+    \item Mean Average Precision (mAP)
+    \item Normalized discounted cumulative gain (nDCG)
+\end{itemize}
+\subsection{Online Metrics}
+
+%******************************************************
+\section{Serving}
+%******************************************************
+\subsection{Prediction Pipeline}
+\subsection{Indexing Pipeline}
+\subsection{NN Performance}
+
+
+
+
+%******************************************************
+\section{References}
+\end{document}

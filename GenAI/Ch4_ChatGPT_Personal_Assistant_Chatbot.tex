@@ -1,0 +1,203 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx, amsmath}
+\usepackage{hyperref}
+\graphicspath{ {./images/} }
+\usepackage[dvipsnames]{xcolor}
+\usepackage{titlesec}
+
+\setcounter{secnumdepth}{4}
+
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+\title{ChatGPT: Personal Assistant Chatbot}
+\author{Sumit Singh}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Clarifying Requirements}
+
+
+\section{Framing as ML}
+
+\section{Data Preparation}
+
+\section{Model Development}
+\subsection{Architecture}
+The LLM's architecture is based on decoder-only Transformer. While text embedding, Transformer blocks, and the prediction head are similar to the decoder-only transformer, LLMs typically use more advanced positional encoding methods. \\
+\begin{table}[h!]
+    \centering
+    % \caption{Table with an embedded figure}
+    \label{tab:figure_in_table}
+    \begin{tabular}{|p{6cm}|} % Define columns: centered and paragraph with 4cm width
+        \hline
+        
+            \includegraphics[width=4cm]{GenAI/Images/ComponentsOfADecoder_Only_Transformer.png} 
+            \\
+        \hline
+        Fig: Components of a decoder-only Transformer \\
+        \hline
+    \end{tabular}
+\end{table}
+Let us examine LLM's positional encoding in more detail.
+\subsubsection{Positional Encoding}
+In a chatbot setting, the input sequence is typically much longer than a single sentence or email. Our goal is to build a system with \textit{context window} of at least 4096 tokens. This requires a positional encoding method that allows the model to understand the positions of all the tokens and the relationship between them. 
+\paragraph{Absolute Positional Encoding}
+Absolute positional encoding refers to traditional methods such as sinusoidal or learnable \textit{encodings}  whereby each position in a sequence is represented by a unique vector. \\
+In this approach, \textit{encoded positions}  are then added to the \textit{token embeddings}, providing the model with information about where each token appears in the sequence. Formally, the \textit{attention keys} and \textit{queries} are computed using the following equations:
+\begin{align*}
+    q_m &= W_q(e_m + p_m) \\
+    k_n &= W_k (e_n + p_n)
+\end{align*}
+where:
+\begin{itemize}
+    \item $q_m$: the query vector at position $m$
+    \item $k_n$: the key vector at position $n$
+    \item $W_q$ and $W_k$: learnable weight matrices
+    \item $e_m$ and $e_n$: token embeddings at position $m$ and $n$
+    \item $p_m$ and $p_n$: positional vectors (either learnable or fixed) at positions $m$ and $n$ 
+    
+\end{itemize}
+The \textit{attention score} is calculated as a dot product of the \textit{query vector} and \textit{key vector}:
+\begin{align*}
+    q_m \cdot k_n &= W_q(e_m + p_m) \cdot W_k(e_n + p_n) \\
+    &= (W_q e_m +W_q p_m) \cdot (W_k e_n + W_k p_n) \\
+    &= e_m W_q W_k e_n + e_m W_q W_k p_n + p_m W_q W_k e_n + p_m W_q W_k p_n 
+\end{align*}
+Positional encodings $p_m$ and $p_n$ depend only on absolute positions. Therefore, this approach captures only information about absolute position, limiting the model's ability to capture relative distances between \textit{tokens} and to generalize to sequences with different lengths or unseen token positions. For example, a model trained on a sequence of up to 512 tokens may struggle to generalize when applied to a sequence with 4096 tokens. The sinusoidal patterns tend to become repetitive over long distances, resulting in a loss of information about token relationships. This shortcoming is addressed by relative positional encoding. 
+\paragraph{Relative Positional Encoding}
+\paragraph{Rotary Positional Encoding (RoPE)}
+RoPE represents \textit{positional information as a rotation matrix} applied to the \textit{token embeddings}. This can be described mathematically as follows: \textit{ Given an input sequence, RoPE applies a rotation matrix to each embedding}. This transformation can be expressed as:
+\begin{align*}
+    f(q_m, m) = q_m \cdot R(\theta_m)
+\end{align*}
+where:
+\begin{itemize}
+    \item $q_m$: \textit{Token Embedding} at the position $m$
+    \item $R(\theta_m)$: a \textit{rotation matrix parametrized} by the \textit{positional angle} $\theta_m$  
+\end{itemize}
+This angle is typically derived from the position index $m$ and is constructed in such a way that the rotation captures both the absolute and relative position information. This rotation matrix, constructed using trigonometric functions, rotates the embeddings in the complex plane, capturing both \textit{absolute} and \textit{relative positional information}. \\
+\begin{table}[h!]
+    \centering
+    % \caption{Table with an embedded figure}
+    \label{tab:figure_in_table}
+    \begin{tabular}{|p{9cm}|} % Define columns: centered and paragraph with 4cm width
+        \hline
+        
+            \includegraphics[width=9cm]{GenAI/Images/RoPE_in_2D.png} 
+            \\
+        \hline
+        Fig: RoPE in 2D \\
+        \hline
+    \end{tabular}
+\end{table}
+In the figure, the words "cat" and "dog" are represented as vectors, and the angle between them, denoted by $\theta$, encodes their positional relationship. This demonstrates how RoPE captures both the absolute and relative positions of words, allowing the model to understand the order and distance between words in a sentence. \\
+In a higher-dimensional space, the rotation matrix can be extended to accommodate $d$ dimensions:\\
+\begin{gather}
+ R^d_{\theta, m}
+ =
+  \begin{bmatrix}
+   cos(m \theta_1) &
+   -sin(m \theta_1) & 0 & 0 & \dots & 0 & 0\\
+   sin(m \theta_1) &
+   cos(m \theta_1) & 0 & 0 & \dots & 0 & 0 \\
+   0 & 0 & cos(m \theta_2) &
+   -sin(m \theta_2) & \dots & 0 & 0 \\
+   0 & 0 & sin(m \theta_2) &
+   cos(m \theta_2)  & \dots & 0 & 0 \\
+   \vdots & \vdots & \vdots & \vdots
+    & \ddots & \vdots & \vdots \\
+   0 & 0 & 0 & 0
+    & \dots & sin(m \theta_{d/2}) & cos(m \theta_{d/2}) \\
+   0 & 0 & 0 & 0
+     & \dots & sin(m \theta_{d/2}) & cos(m \theta_{d/2}) \\
+   \end{bmatrix}
+\end{gather}
+$R^d_{\theta,m}$: Rotation matrix with $d$ dimensions parametrized by the positional angle $\theta$ \\
+Pros:
+\begin{itemize}
+    \item \textbf{Translational invariance}: RoPE encodes positional information in a way that remains consistent even when the positions of tokens shift. This helps the model handle changes in position better than other methods. 
+    \item \textbf{Relative position representation}: \textit{RoPE's rotations encode positional information geometrically within the embedding space}. This enables the model to inherently understand the relative distance between tokens, unlike traditional sinusoidal encodings, which encode position additively without leveraging geometric insight. 
+    \item \textbf{Generalization to unseen positions}: Because RoPE encodes positions through rotations, the resulting embeddings maintain consistent relationships regardless of absolute position. This allows for better generalization across varying sequence lengths. 
+\end{itemize}
+Cons:
+\begin{itemize}
+    \item \textbf{Mathematical complexity}: RoPE introduces additional mathematical operations involving rotations in the embedding space. While they are not overly complex, they are more intricate than traditional positional encoding methods, such as sinusoidal or learned positional embeddings.
+\end{itemize}
+\subsection{Training}
+Most chatbots, including ChatGPT, use a three stage training strategy:
+\begin{itemize}
+    \item Pretraining
+    \item Supervised finetuning (SFT)
+    \item Reinforcement Learning from human feedback (RLHF)
+\end{itemize}
+\subsubsection{Pretraining}
+Pretraining is the initial stage of the training process. In this stage, a model is trained with an enormous volume of text from the internet. The purpose of pretraining is to create a base model with a broad understanding of language and world knowledge. \\
+The pretraining stage require significant computational resources. It typically requires thousands of GPUs, costs millions of dollars, and takes months of training.
+\paragraph{Pretraining Data}
+Commonly used datasets are:
+\begin{itemize}
+    \item \textbf{Common Crawl}:
+    \item \textbf{C4}:
+    \item \textbf{GitHub}:
+    \item \textbf{Wikipedia}:
+    \item \textbf{Books}:
+    \item \textbf{ArXiv}: The Arxiv dataset contains academic materials and published papers. This dataset helps the model understand the terminology and knowledge within the academic domain.
+    \item \textbf{Stack Exchange}:
+\end{itemize}
+\paragraph{ML Objective and Loss Function}
+As we are training a \textit{decoder-only} Transformer for text generation, we use:
+\begin{itemize}
+    \item \textbf{ML objective}: \textit{next-token prediction}
+    \item \textbf{Loss Function}: \textit{cross-entropy loss} to measure the difference between the predicted token probabilities and the correct tokens
+\end{itemize}
+
+\paragraph{The outcome of the pretraining stage}
+The pretraining stage produces a model that understands language well. This model, usually referred to as \textit{the base model}, predicts text to follow the given input prompt, generating relevant and meaningful text. \\
+While the base model understands language well, it is only capable of continuing from the text prompt. To make the model a useful chatbot that answers questions, we need to further train the base model. This leads to the next stage: \textbf{supervised finetuning}.
+\subsubsection{SFT}
+SFT, also named \textbf{instruction finetuning}, is the second stage of the training process. In this stage, we finetune the base model on a smaller, high-quality dataset in a \textit{(prompt, response) format}. The purpose of this stage is to preserve the base model's language understanding and world knowledge while adapting its behavior to respond to prompts instead of just continuing them.
+\paragraph{Training Data}
+The training data for the SFT stage allows the \textit{(prompt, response) format}. This data is usually called the \textbf{demonstration data} because it demonstrates to the model how to respond to prompts.
+The main difference between demonstration data and pretraining data, aside from format, is size and quality. 
+\begin{itemize}
+    \item \textbf{Size}: \textit{The demonstration} is significantly smaller than the pretraining data. It usually ranges from 10,000 to 100,000 (prompt, response) pairs.
+    \item \textbf{Quality}: \textit{Demonstration data} is of higher quality compared to pretraining data.
+\end{itemize}
+\paragraph{ML Objective \& Loss Function}
+Although the training data differs from the pretraining stage, the model still learns a similar task: \textit{generating text one token at a time based on the input prompt}. Therefore, the \textit{ML objectives} and \textit{Loss Functions} remain similar to those at the pretraining stage:
+\begin{itemize}
+    \item \textbf{ML Objective}: \textit{Next-Token Prediction}
+    \item \textbf{Loss Function}: \textit{Cross-Entropy Loss Function}
+\end{itemize}
+\paragraph{The outcome of the SFT stage}
+The outcome of this stage is the \textbf{SFT Model}, \textit{a finetuned version of the base model}. Instead of merely continuing the text prompt, the SFT model generates detailed and helpful responses because it has been trained on \textit{demonstration data} in a \textit{(prompt, response) format}. \\
+The SFT model usually generates grammatically correct and reasonable responses. However, it might not always generate the best response; its answers can be unhelpful or even unsafe. To ensure the model produces relevant, safe, and helpful responses, we must further finetune the model. This further finetuning is the primary focus of the next stage: RLHF.
+\subsubsection{RLHF: Reinforcement Learning for Human Feedback}
+Reinforcement learning from Human Feedback (RLHF), also known as the \textbf{alignment stage}, is the final stage in the training process. This stage aligns the model with human preferences; that is, it adapts the model to generate responses preferred by humans. \\
+
+
+\paragraph{Training a reward model}
+\paragraph{Optimizing the SFT model}
+\subsection{Sampling}
+In LLM's, \textit{sampling refers to how we select tokens from the model's predicted probability distribution to generate coherent and helpful responses.} 
+\subsubsection{Deterministic Methods}
+\paragraph{Greedy Search}
+\paragraph{Beam Search}
+\subsubsection{Stochastic Methods}
+\paragraph{Multinomial Sampling}
+\paragraph{Top-k Sampling}
+\paragraph{Top-p Sampling}
+\section{Evaluation}
+\section{Overall System Components}
+\section{References}
+\begin{itemize}
+    \item \href{https://www.youtube.com/watch?v=gA4YXUJX7t8}{Lecture 2: RPC and Threads}
+\end{itemize}
+\end{document}

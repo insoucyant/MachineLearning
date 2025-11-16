@@ -1,0 +1,121 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx, amsmath}
+\usepackage{hyperref}
+\graphicspath{ {./images/} }
+\usepackage[dvipsnames]{xcolor}
+\usepackage{titlesec}
+
+\setcounter{secnumdepth}{4}
+
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+    {0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+\title{Realistic Face Generation}
+\author{Sumit Singh}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+\section{Frame the Problem as an ML Task }
+\subsection{Specifying the system's input and output}
+\subsection{Choosing a suitable ML approach}
+\subsubsection{Variational Autoencoder}
+A Variational AutoEncoder is a generative model architecture designed to learn the distribution of the data. This enables the VAE to generate new data points by sampling from the learned distribution. \\
+A VAE consists of two neural networks:
+\begin{itemize}
+    \item Encoder
+    \item Decoder
+\end{itemize}
+\textbf{Encoder}: The encoder is a neural network that maps an input image into a lower-dimensional space called \textit{the latent space}. The output of the encoder is a \textit{latent vector}, an encoded representation of the input image.\\
+\textbf{Decoder}: The decoder is another neural network that maps the encoded representation into an image. The output of the decoder is an image of the same size as the original input image. \\
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{GenAI/Images/7vae1.png}
+    \caption{VAE}
+    \label{fig:placeholder}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{GenAI/Images/7VAE2.jpg}
+    \caption{VAE}
+    \label{fig:placeholder}
+\end{figure}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\linewidth]{GenAI/Images/7vae3.png}
+    \caption{VAE}
+    \label{fig:placeholder}
+\end{figure}
+During training, the VAE encodes the input into a latent space and then reconstructs the original image from this encoded representation. After training, the VAE can generate new images by sampling points from the learned distribution and using the decoder to map these points into image form. \\
+Through a \textbf{reparametrization} trick, VAEs model the latent vector as being sampled from a multivariate Gaussian distribution. The modeling of latent space helps the VAE learn meaningful representations that can be smoothly interpolated, which is advantageous for tasks such as image morphing and creating variations of input data.
+\subsubsection{Generative Adversarial Network}
+A Generative Adversarial Network consists of two neural networks:
+\begin{itemize}
+    \item \textbf{Generator}: A neural network that converts random noise into an image
+    \item \textbf{Discriminator}: Another neural network that determines whether a given image is real or artificially generated
+\end{itemize}
+During training, these two networks engage in a \textit{continuous game}: the generator learns to create more realistic images, while the discriminator becomes better at distinguishing real images from generated ones. If a generated image is correctly classified as ``generated", the generator will receive a penalty for not generating a realistic image. The \textit{adversarial process} continues until the generator produces images that the discriminator can no longer differentiate from real ones.
+\subsubsection{Autoregressive Model}
+In autoregressive modeling, image generation is formulated as a sequence generation task, where each part of an image is generated sequentially. The sequential generation enables the use of the Transformer architecture, allowing us to benefit from its powerful ability to capture long-range dependencies. 
+\subsubsection{Diffusion Model}
+The diffusion model formulates image generation as an iterative process. \\ \textit{  During training}, noise is gradually added to images, and a neural network is designed to predict the noise. \\ \textit{When Generating} images during inference, the process begins with random noise. The trained neural network is then used to iteratively denoise the image, transforming the noise into a meaningful image. The transformation occurs over a fixed number of steps, with the model adding details to the image at each step .
+\section{Data Preparation}
+\begin{itemize}
+    \item Remove low-quality or low-resolution images.
+    \item \textbf{Augment Images}
+    \item Normalize and resize images
+    \item Enhance diversity
+\end{itemize}
+\section{Model Development}
+Generative Adversarial Network (GAN) consist of two components: a generator and a discriminator. 
+\subsection{Generator}
+The generator component takes random noise as input and converts it into an image. Its architecture consists of a series of \textit{upsampling blocks}, each of which increases the spatial dimensions (height and width) of its input. These blocks gradually transform the low-dimensional noise vector into a 2D image of the desired size. \\
+The three main components of the upsampling blocks are:
+\begin{itemize}
+    \item Transposed Convolution
+    \item Normalization Layer
+    \item Non-linear activation
+\end{itemize}
+\subsubsection{Transposed Convolution}
+\textit{Transposed Convolution}, also known as \textit{deconvolution} or \textit{upsampling convolution} , is an operation used in neural networks to increase the spatial resolution of feature maps—essentially performing the opposite of a regular convolution. It is widely used in applications such as image generation, \textit{semantic segmentation} , and super-resolution, where the goal is to reconstruct higher-resolution outputs from lower resolution inputs. \\
+Unlike standard convolution, which slides a filter across the input, transposed convolution starts by inserting zeros between the pixels of the input feature map, effectively expanding it. The expanded input is then convolved with a filter, where the filter's stride and padding are adjusted to achieve the desired output size. For example, starting with an input of $1 \times  1 \times 100$, with 1024 filters of kernel size $1 \times 1$ and stride $1$, we end up with a $4 \times 4 \times 1024$ feature map. In the next step, with 512 filters of kernel size $3 \times 3$ and a stride of 1, we obtain an $8 \times 8 \times 512$ feature map. These are the first two upsampling stages shown in the figure.
+\begin{itemize}
+    \item \textbf{Stride} controls how much the filter moves across the input during convolution; larger strides skip more pixels
+    \item \textbf{Padding} adds extra borders around the input to control the output size during convolution
+\end{itemize}
+In PyTorch, this layer is usually implemented with ``ConvTranspose2d".
+\subsubsection{Normalization Layer}
+A normalization layer improves training stability by scaling the input data to have a consistent distribution.  \\
+Training GANs is unstable because it involves two networks (the generator and the discriminator) competing against each other. This can lead to problems such as \textbf{ mode collapse} , where the generator produces limited diversity, or oscillations, where the generator and discriminator fail to converge during training. \textit{Normalization helps stabilize the training by scaling the activations at each layer, thus reducing the risk of vanishing or exploding gradients.} This process helps maintain a consistent distribution of activations, which is critical for balanced competition between the generator and discriminator. With a more robust optimization process, we can use a higher learning rate, speed up training, and reduce the time needed for convergence. \\
+There are several normalization layers, each with its own way of normalizing data:
+\begin{itemize}
+    \item Batch Normalization
+    \item Layer Normalization
+    \item Instance Normalization
+    \item Group Normalization
+\end{itemize}
+\paragraph{Batch Normalization}
+\paragraph{Layer Normalization}
+\paragraph{Instance Normalization}
+\paragraph{Group Normalization}
+\subsubsection{Non-linear Activation}
+\subsection{Discriminator}
+\section{Evaluation}
+\subsection{Offline}
+\subsection{Online}
+
+\section{Overall System Components}
+
+\section{References}
+\begin{itemize}
+    \item %https://slazebni.cs.illinois.edu/spring17/lec12_vae.pdf
+    \item %https://webthesis.biblio.polito.it/10360/1/tesi.pdf
+    \item %https://deeplearning.cs.cmu.edu/S22/document/slides/lec21.VAE.pdf
+\end{itemize}
+\end{document}

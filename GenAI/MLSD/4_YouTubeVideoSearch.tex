@@ -1,0 +1,219 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx, amsmath, amssymb}
+\usepackage{hyperref}
+\graphicspath{ {./images/} }
+\usepackage[dvipsnames]{xcolor}
+\usepackage{titlesec}
+
+\setcounter{secnumdepth}{4}
+
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+\title{YouTube Video Search}
+\author{Sumit Singh}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+
+
+
+%******************************************************
+\section{Introduction}
+%******************************************************
+
+
+
+
+
+%******************************************************
+\section{Frame the Problem as an ML Task}
+%******************************************************
+\subsection{Defining the ML Objective}
+
+\subsection{Specifying the Video Search System's input and output}
+
+\subsection{Choosing the right ML Category}
+In order to determine \textit{the relevance between a video and a text query}, we utilize both \textit{the visual content} and \textit{the video's textual data}. An overview of the design can be seen in the following figure.
+Let us briefly discuss each component.
+\subsubsection{Visual Search}
+This component takes a text query as input and outputs a list of videos. The videos are ranked based on the similarity between the text query and the video's visual content. \\
+\textbf{Representation Learning} is a commonly used approach to search for videos by processing their visual content. In this approach, text query and video are encoded separately using two encoders. The ML model contains a \textit{video encoder} that generates an \textit{embedding vector} from the video, and a \textit{text encoder} that generates an \textit{embedding vector} from the text. The \textit{similarity score} between the video and the text is calculated using the dot product of their representations. \\
+
+In order to rank videos that are visually and semantically similar to the text query. we compute the dot product between the text and each video in the embedding space, then rank the videos based on their similarity scores.
+
+\subsubsection{Text Search}
+\textit{How does text search work when a user types in a text query?} When a user types in a text query, such as "dogs playing indoors,", videos with the most similar titles, descriptions, or tags to the text query are retrieved and shown as the output. \\
+The \textbf{inverted index} is a common technique for creating the text-based search component, allowing efficient full-text search in databases. Since inverted index are not based on machine learning, there is no training cost. A popular search engine that companies often use is \textbf{Elasticsearch}, which is a \textbf{scalable search engine} and \textbf{document store}. 
+
+
+
+%******************************************************
+\section{Data Preparation}
+%******************************************************
+\subsection{Data Engineering}
+Since we are given \textbf{annotated dataset} to train and evaluate the model, it is not necessary to perform any data engineering.
+\subsection{Feature Engineering}
+Almost all ML algorithms accept only numeric input values. \textit{Unstructured data} , such as texts and videos, needs to be converted into a numerical representation during this step. How do you prepare text and video data for the model?
+\subsubsection{Preparing text Data}
+Text is typically represented  as a numerical vector using three steps:
+\begin{itemize}
+    \item Text Normalization
+    \item Tokenization
+    \item Tokens to IDs
+\end{itemize}
+\paragraph{Text Normalization}
+\textbf{Text Normalization} —also known as \textbf{text cleanup} —ensures that words and sentences are consistent. For example, the same word may be spelled slightly differently; as in "dog,", "dogs,", and "DOG!" all refer to the same thing but are spelled in different ways. The same is true for sentences. Take these two sentences, for example:
+\begin{itemize}
+    \item "A person walking with his dog in Montreal!"
+    \item "a person walks with his dog, in Montreal."
+\end{itemize}
+Both sentences mean the same but have differing punctuation and verb forms. Here are some typical methods for text normalization:
+\begin{itemize}
+    \item Lowercasing
+    \item Punctuation removal
+    \item Trim whitespaces
+    \item Normalization Form KD (NFKD)
+    \item Strip accents
+    \item Lemmatization and stemming
+\end{itemize}
+
+
+
+
+\paragraph{Tokenization}
+\paragraph{Tokens to    IDs}
+
+
+%******************************************************
+\section{Model Development}
+%******************************************************
+\subsection{Model Selection}
+\subsubsection{Text Encoder}
+\textit{The text encoder converts text into a vector representation}. If two sentences have similar meanings, their embeddings are more similar. To build the text encoder, two broad categories are available: statistical methods and ML-based methods.
+\paragraph{Statistical Methods}
+\textbf{Bag of Words (BoW)} \\
+\textbf{Term Frequency Inverse Document Frequency (TF-IDF)}
+\paragraph{ML-based methods}
+In these methods, ML model converts sentences into meaningful word embeddings so that the distance between the embeddings reflects the semantic similarity of the corresponding words. \\
+There are three common ML-based approaches for transforming texts into embeddings:
+\begin{itemize}
+    \item Embedding (lookup) layer
+    \item Word2vec
+    \item Transformer-based architecture
+\end{itemize}
+\textbf{Embedding (lookup) layer} \\ 
+In this approach, an embedding layer is employed to map each ID to an embedding vector. Employing an embedding layer is a simple and effective solution to convert sparse features, such as IDs, into a \textit{fixed size embedding}. \\
+\textbf{Word2vec} \\
+Word2vec is a family of related models used to produce word embeddings. These models use a shallow neural network architecture and utilize the co-occurrences of words in a local context to learn word embeddings. In particular, the model learns to predict a center word from its surrounding words during the training phase. After teh training phase, the model is capable of converting words into meaningful embeddings. \\
+There are two main models based on word2vec:
+\begin{itemize}
+    \item \textbf{Continuous Bag of Words (CBOW)}
+    \item \textbf{Skip-gram}
+\end{itemize}
+Even though word2vec and embedding layers are simple and effective, recent architectures based on Transformers have shown promising results. \\
+\textbf{Transformer-based architecture} \\
+These models consider the context of the words in a sentence when converting them into embeddings. As opposed to word2vec models, they produce different embeddings for the same word depending on the context. \\
+Transformers are very powerful in understanding context and producing meaningful embeddings. Several models, such as BERT, GPT3, and BLOOM, have demonstrated the potential of Transformers to perform a wide variety of NLP tasks. We chose BERT (a transformer based architecture) as our text encoder. 
+\subsubsection{Video Encoder}
+We have two architectural options for encoding videos:
+\begin{itemize}
+    \item Video-level models
+    \item Frame-level models
+\end{itemize}
+
+Video-level models process a whole video to create an embedding. The model architecture is usually based on 3D convolutions or Transformers. Since the model processes the whole video, it is computationally expensive. \\
+Frame-level models work differently. It is possible to extract the embedding from a video using a frame-level model by breaking it down into three steps:
+\begin{itemize}
+    \item Preprocess a video and sample frames
+    \item Run the model on the sampled frames to create frame embeddings
+    \item Aggregate (e.g., average) frame embeddings to generate the video embedding
+\end{itemize}
+Since this model works at the frame level, it is often faster and computationally less expensive. However, frame-level models are usually not able to understand the temporal aspects of video, such as actions and motions. In practice, a frame-level model is preferred in many cases where a temporal understanding of the video is not crucial. Here, we employ a frame-level model, such as \textbf{ViT} , for two reasons:
+\begin{itemize}
+    \item Improve the training and serving speed
+    \item Reduce the number of computations
+\end{itemize}
+\subsection{Model Training}
+To train the \textit{text encoder} and \textit{video encoder}, we use a \textbf{contrastive learning} approach.
+
+
+
+%******************************************************
+\section{Evaluation}
+%******************************************************
+\subsection{Offline metrics}
+\subsubsection{Precision@k and mAP}
+\begin{align*}
+    precision@k = \frac{No \; of \: relevant \: videos \: among \: the \: top \: k \: videos}{k}
+\end{align*}
+\subsubsection{Recall@k}
+\begin{align*}
+    recall@k = \frac{No \: of \: relevant \: videos \: among \: the \: top \: k \: videos}{Total \: number \: of \: relevant \: videos}
+\end{align*}
+\subsubsection{Mean reciprocal Rank (MRR)}
+This metric measures the quality of the model by averaging the rank of the first relevant item in each search result. 
+\begin{align*}
+    MRR = \frac{1}{m} \sum_{i=1}^m \frac{1}{rank_i}
+\end{align*}
+\subsection{Online metrics}
+The important online metrics are:
+\begin{itemize}
+    \item Click-through Rate (CTR)
+    \item Video completion rate
+    \item Total watch time of search results
+\end{itemize}
+
+
+
+
+%******************************************************
+\section{Serving}
+%******************************************************
+At serving time, the system displays a ranked list of videos that are relevant to the given text query.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\linewidth]{GenAI/Images/4_19_ML_System_Design.jpg}
+    \caption{ML System Design}
+    \label{fig:placeholder}
+\end{figure}
+
+\subsection{Prediction Pipeline}
+This pipeline consists of:
+\begin{itemize}
+    \item Visual Search
+    \item Text Search
+    \item Fusing Layer
+    \item Re-ranking Service
+\end{itemize}
+\subsubsection{Visual Search}
+\textit{This component encodes the text query and uses the nearest neighbor service to find the most similar video embeddings to text embeddings.} To accelerate the nearest neighbor (NN) search, we use approximate nearest neighbor (ANN) algorithms.
+\subsubsection{Text Search}
+Using \textit{Elasticsearch}, this component finds videos with titles and tags that overlap the text query.
+\subsubsection{Fusing Layer}
+This component takes two different lists of relevant videos from the previous step and combines them into a new list of videos. \\
+The \textit{fusing layer} can be implemented in  two ways; the easiest of which is to re-rank videos based on the weighted sum of their predicted relevance scores. A more complex approach is to adopt an additional model to re-rank the videos, which is more expensive because it requires model training. Additionally, it is slower at serving. As a result, we use the former approach.
+\subsubsection{Re-ranking Service}
+This service modifies the ranked list of videos by incorporating business-level logic and policies. 
+\subsection{Video Indexing Pipeline}
+A trained video encoder is used to compute video embeddings, which are then indexed. These indexed video embeddings are used by the nearest neighbor service.
+\subsection{Text Indexing Pipeline}
+This uses Elasticsearch for indexing titles, manual tags, and auto-generated tags.
+%******************************************************
+\section{Questions}
+%******************************************************
+What is the difference between Tokenization and Embeddings? \\
+Tokenization breaks texts into smaller pieces called tokens, while embeddings convert those tokens into numerical vectors that capture their meanings. \\
+
+
+%******************************************************
+\section{Terms}
+%******************************************************
+Representation Learning $\triangle$ Inverted Index $\clubsuit$ Document Store $\spadesuit$ Elastic Search $\heartsuit$ Annotated Dataset $\square$ Contrastive Learning
+\section{References}
+\end{document}

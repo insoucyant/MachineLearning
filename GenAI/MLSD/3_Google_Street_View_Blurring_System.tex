@@ -1,0 +1,136 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx, amsmath, amssymb}
+\usepackage{hyperref}
+\graphicspath{ {./images/} }
+\usepackage[dvipsnames]{xcolor}
+\usepackage{titlesec}
+
+\setcounter{secnumdepth}{4}
+
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+\title{Google Street View Blurring System}
+\author{Sumit Singh}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+%******************************************************
+\section{Introduction}
+%******************************************************
+We want to design a system that detects all human faces and license plates in Street View images and blurs them before displaying them to users. 
+
+
+
+
+
+
+%******************************************************
+\section{Framing as ML}
+%******************************************************
+
+
+
+
+
+
+%******************************************************
+\section{Data Preparation}
+%******************************************************
+
+
+
+
+
+
+%******************************************************
+\section{Model Development                                                                         }
+%******************************************************
+
+
+
+
+
+
+%******************************************************
+\section{Evaluation}
+%******************************************************
+
+
+
+
+
+
+%******************************************************
+\section{Serving}
+%******************************************************
+In this section, we first discuss a common problem that may occur in object detection systems: \textit{overlapping bounding boxes}. Next, we propose an overall ML System Design. 
+
+\subsection{Overlapping bounding boxes}
+When running an object detection algorithm on an image, it is very common to observe overlapping bounding boxes. This is because the RPN network proposes various highly overlapping bounding boxes around each object. It is important to narrow down these bounding boxes to a single bounding box per object during inference. \\
+
+A widely used solution is an algorithm called "\textbf{Non-Maximum Suppression}" (NMS).
+\subsubsection{NMS}
+NMS is a post-processing algorithm designed to select the most appropriate bounding boxes. It keeps highly confident boxes and removes overlapping boxes.
+
+\subsection{ML System Design}
+Draw Fig here.\\
+There are two pipelines:
+\begin{itemize}
+    \item Data Pipeline
+    \item Batch Prediction Pipeline
+\end{itemize}
+Let us examine each pipeline in more detail.
+\subsubsection{Batch Prediction Pipeline}
+Based on the gathered requirements, latency is not a significant concern because we can display existing images to users while new ones are being processed. Since instant results  are not required, we can utilize batch prediction and precompute the object detection results. 
+
+
+\paragraph{Preprocessing}
+Raw images are preprocessed by this component. 
+\paragraph{Blurring Service}
+
+This performs the following operations on a Street View image:
+\begin{itemize}
+    \item Provides a list of objects detected in the image
+    \item Refines the list of detected objects using the NMS component
+    \item Blurs detected objects
+    \item Stores the blurred image in  \textbf{object storage} (Blurred Street View images)
+\end{itemize}
+
+Note that preprocessing and blurring services are separate in the design. The reason is that preprocessing images tends to be a \textit{CPU-bound process}, whereas the blurring service relies on the GPU. Separating these services has two benefits:
+\begin{itemize}
+    \item \textit{ Scale the services} independently based on the workload each receives
+    \item Better utilization of CPU and GPU resources for efficiency.
+\end{itemize}
+\subsubsection{Data Pipeline}
+This pipeline is responsible for processing users' reports, generating new training data and preparing training data to be used by the model.
+
+\paragraph{Hard negative mining}
+\textbf{Hard Negatives} are examples that are explicitly created as negatives from incorrectly predicted examples, and then added to the training dataset. When we retrain the model on the updated training dataset, it should perform better.  
+
+
+
+
+%******************************************************
+\section{Questions}
+%******************************************************
+\begin{itemize}
+    \item What is the difference between block, object and file storage?
+\end{itemize}
+
+
+%******************************************************
+\section{Terms}
+%******************************************************
+Annotated Datasets $\sharp$ Image Augmentation $\flat$ Dataset Preparation Workflow $\diamond$ Model Development is an iterative process $\bigtriangledown$ Data Pipeline $\bigtriangleup$ Batch Prediction Pipeline $\bigwedge$ Model Training $\bigvee$ ML Model $\blacksquare$ Serving $\blacklozenge$ Object Storage.
+\section{References}
+% chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://www.geneseo.edu/sites/default/files/sites/math/pdf-files/latex.pdf
+
+
+\end{document}

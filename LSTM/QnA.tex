@@ -252,6 +252,7 @@ data = range(100) # Actual Time Series Data (Replace)
 dataset = TimeSeriesDataset(data)
 dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
 \end{lstlisting}
+
 \subsection{Model Input Requirements}
 PyTorch's RNN module expects inputs to be 3D Tensors with dimensions: Batch Size, Sequence Length, and Input Size.
 \subsubsection{Batch Size}
@@ -273,6 +274,17 @@ standardized_data = (data-mean)std
 \end{lstlisting}
 \subsection{Handling Variable Length Sequence}
 Employing RNNs for datasets with variable length sequences requires additional steps:
+
+\noindent
+{\color{red} \rule{\linewidth}{0.5mm}}
+\textcolor{red}{What is num\_layers in RNN module?} \\
+\noindent
+\includegraphics[width=5cm, height=3.5cm]{LSTM/images/num_layers.png}
+\\
+num\_layers in RNN is just stacking RNNs on top of each other. So you get a hidden from each layer and an output only from the topmost layer.
+\includegraphics[width=5cm, height=3.5cm]{LSTM/images/numLayers2.png}
+\\
+This means num\_layers==2. And we can get last hidden.
 \subsection{Sequence Padding}
 Bring all sequences to the same length by padding shorter ones with a designated padding value. PyTorch offers a ready-to-use function for this.
 \subsubsection{Sequence Sorting}
@@ -288,6 +300,11 @@ For optimized training, sort sequences in descending order based on their length
 {\color{red} \rule{\linewidth}{0.5mm}}
 \textcolor{red}{What is the difference between Input Size and Sequence Length in LSTM?} \\
 \noindent
+\begin{itemize}
+    \item \code{input\_size}: The number of expected features in the input $x$
+    \item \code{hidden\_size}: – The number of features in the hidden state $h$
+\end{itemize}
+ \code{input\_size} and \code{hidden\_size} can differ in size and there is no inherent problem with this.
 %*********************************************************************
 \section{Data Handling and Preprocessing}
 %*********************************************************************
@@ -346,7 +363,7 @@ The common parameters are:
 {\color{red} \rule{\linewidth}{0.5mm}}
 \textcolor{red}{What is the use of transforms in PyTorch's torchvision package?} \\
 \noindent
-In PyTorch's torchvision package, transforms are a versatile set of tools for images preprocessing, augmentation, and data normalization. They streamline the transformation of input data before sending it to the neural network. 
+In PyTorch's torchvision package, transforms are a versatile set of tools for image preprocessing, augmentation, and data normalization. They streamline the transformation of input data before sending it to the neural network. 
 \subsection{Core Transform Types}
 \begin{itemize}
     \item General Transforms: Basic transformations like resizing and cropping
@@ -378,9 +395,9 @@ plt.show()
 %*********************************************************************
 \section{Reference}
 \begin{itemize}
-    \item \href{https://www.youtube.com/watch?v=Y21OR1OPC9As}{Tech With Tim}
-    \item \href{https://packaging.python.org/en/latest/guides/installing-using-pip-and-virtual-environments/}{Python Versioning in venv}
-    \item \href{https://stackoverflow.com/questions/68376749/problems-installing-python-packages-into-a-virtual-environment-in-visual-studio}{py env in vscode}
-    \item \href{https://stackoverflow.com/questions/61528500/installing-venv-for-python3-in-wsl-ubuntu}{venvs in wsl}
+    \item \href{https://medium.com/@erikhallstrm/hello-world-rnn-83cd7105b767}{How to build RNN in tensorflow?}
+    \item \href{}{X}
+    \item \href{}{Y}
+    \item \href{}{Z}
 \end{itemize}
 \end{document}
